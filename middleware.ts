@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 // Pages de l'espace membre accessibles sans être connecté
-const PUBLIC_PATHS = ["/ambassadeurs/connexion", "/ambassadeurs/rejoindre", "/ambassadeurs/auth"];
+const PUBLIC_PATHS = ["/ambassadeurs/connexion", "/ambassadeurs/rejoindre", "/ambassadeurs/auth", "/ambassadeurs/bienvenue"];
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });

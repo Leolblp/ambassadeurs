@@ -71,6 +71,9 @@ export default async function Carte() {
         )}
       </section>
 
+      {profil.role === "admin" && (
+        <a href="/ambassadeurs/admin" className="btn" style={{ alignSelf: "center" }}>Back-office équipe</a>
+      )}
       <Deconnexion />
     </div>
   );
