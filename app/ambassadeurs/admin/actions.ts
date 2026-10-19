@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
-import { requireAdmin, codeDepuisPrenom } from "@/lib/admin";
+import { requireAdmin, requireStaff, codeDepuisPrenom, codeEquipe } from "@/lib/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export type Resultat = { ok: boolean; message: string } | null;
@@ -20,25 +20,28 @@ function heureLyon(saisie: string) {
 /* ---------- Preuves ---------- */
 
 export async function validerPreuve(id: string): Promise<Resultat> {
-  const { supabase } = await requireAdmin();
+  const { supabase } = await requireStaff();
   const { error } = await supabase.rpc("approve_proof", { p_proof: id });
   revalidatePath("/ambassadeurs/admin");
+  revalidatePath("/ambassadeurs/equipe");
   return error ? { ok: false, message: "Validation impossible : " + error.message } : { ok: true, message: "Preuve validée, points crédités." };
 }
 
 export async function refuserPreuve(id: string, message: string): Promise<Resultat> {
-  const { supabase } = await requireAdmin();
+  const { supabase } = await requireStaff();
   const { error } = await supabase.rpc("refuse_proof", { p_proof: id, p_message: message || "Preuve non conforme, renvoie-en une." });
   revalidatePath("/ambassadeurs/admin");
+  revalidatePath("/ambassadeurs/equipe");
   return error ? { ok: false, message: "Refus impossible : " + error.message } : { ok: true, message: "Preuve refusée, le membre est prévenu." };
 }
 
 /* ---------- Demandes d'accès ---------- */
 
 export async function accepterDemande(id: string): Promise<Resultat> {
-  const { supabase, user } = await requireAdmin();
+  const { supabase, user, isAdmin, team } = await requireStaff();
   const { data: d } = await supabase.from("access_requests").select("*").eq("id", id).single();
   if (!d || d.status !== "pending") return { ok: false, message: "Demande introuvable ou déjà traitée." };
+  if (!isAdmin && d.team_id !== team?.id) return { ok: false, message: "Cette demande n'est pas pour ta team." };
 
   let admin;
   try {
@@ -66,19 +69,21 @@ export async function accepterDemande(id: string): Promise<Resultat> {
     if (!pris) break;
     code = base.replace("-XOXO", `${i}-XOXO`);
   }
-  await admin.from("profiles").update({ promo_code: code }).eq("id", cree.user.id);
+  await admin.from("profiles").update({ promo_code: code, team_id: d.team_id ?? null }).eq("id", cree.user.id);
 
   // 3. Demande marquée acceptée
   await supabase.from("access_requests").update({ status: "accepted", reviewed_by: user.id, reviewed_at: new Date().toISOString() }).eq("id", id);
 
   revalidatePath("/ambassadeurs/admin/demandes");
+  revalidatePath("/ambassadeurs/equipe");
   return { ok: true, message: `Bienvenue à ${d.first_name} : code ${code}, invitation envoyée par email.` };
 }
 
 export async function refuserDemande(id: string): Promise<Resultat> {
-  const { supabase, user } = await requireAdmin();
+  const { supabase, user } = await requireStaff();
   const { error } = await supabase.from("access_requests").update({ status: "refused", reviewed_by: user.id, reviewed_at: new Date().toISOString() }).eq("id", id).eq("status", "pending");
   revalidatePath("/ambassadeurs/admin/demandes");
+  revalidatePath("/ambassadeurs/equipe");
   return error ? { ok: false, message: error.message } : { ok: true, message: "Demande refusée." };
 }
 
@@ -180,4 +185,53 @@ export async function annulerPrivilege(id: string): Promise<Resultat> {
   await supabase.from("points_ledger").insert({ member_id: r.member_id, delta: r.cost, reason: "adjustment", redemption_id: id, note: "Privilège annulé, points rendus", created_by: user.id });
   revalidatePath("/ambassadeurs/admin/privileges");
   return { ok: true, message: "Annulé, points rendus au membre." };
+}
+
+/* ---------- Équipes ---------- */
+
+export async function creerEquipe(_: Resultat, f: FormData): Promise<Resultat> {
+  const { supabase } = await requireAdmin();
+  const nom = txt(f, "name");
+  const chef = txt(f, "leader_id");
+  const bonus = parseInt(txt(f, "bonus_percent") || "10", 10);
+  if (!nom) return { ok: false, message: "Nom de l'équipe obligatoire." };
+  const { data, error } = await supabase
+    .from("teams")
+    .insert({ name: nom, leader_id: chef || null, bonus_percent: Number.isFinite(bonus) ? bonus : 10, invite_code: codeEquipe(nom) })
+    .select("id")
+    .single();
+  if (error) return { ok: false, message: error.message };
+  if (chef) await supabase.from("profiles").update({ team_id: data.id }).eq("id", chef);
+  revalidatePath("/ambassadeurs/admin/equipes");
+  return { ok: true, message: `Équipe « ${nom} » créée.` };
+}
+
+export async function modifierEquipe(id: string, _: Resultat, f: FormData): Promise<Resultat> {
+  const { supabase } = await requireAdmin();
+  const chef = txt(f, "leader_id");
+  const bonus = parseInt(txt(f, "bonus_percent"), 10);
+  const { error } = await supabase.from("teams").update({
+    name: txt(f, "name"), leader_id: chef || null, bonus_percent: Number.isFinite(bonus) ? bonus : 10,
+  }).eq("id", id);
+  if (error) return { ok: false, message: error.message };
+  if (chef) await supabase.from("profiles").update({ team_id: id }).eq("id", chef);
+  revalidatePath("/ambassadeurs/admin/equipes");
+  return { ok: true, message: "Équipe mise à jour." };
+}
+
+export async function supprimerEquipe(id: string): Promise<Resultat> {
+  const { supabase } = await requireAdmin();
+  const { error } = await supabase.from("teams").delete().eq("id", id);
+  revalidatePath("/ambassadeurs/admin/equipes");
+  return error ? { ok: false, message: error.message } : { ok: true, message: "Équipe supprimée, ses membres sont sans équipe." };
+}
+
+export async function affecterEquipe(_: Resultat, f: FormData): Promise<Resultat> {
+  const { supabase } = await requireAdmin();
+  const membre = txt(f, "member_id");
+  const equipe = txt(f, "team_id");
+  const { error } = await supabase.from("profiles").update({ team_id: equipe || null }).eq("id", membre);
+  revalidatePath("/ambassadeurs/admin/membres");
+  revalidatePath("/ambassadeurs/admin/equipes");
+  return error ? { ok: false, message: error.message } : { ok: true, message: equipe ? "Membre affecté." : "Membre retiré de son équipe." };
 }

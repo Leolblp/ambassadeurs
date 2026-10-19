@@ -2,11 +2,27 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 export default function Rejoindre() {
+  return (
+    <Suspense>
+      <Formulaire />
+    </Suspense>
+  );
+}
+
+function Formulaire() {
   const [etat, setEtat] = useState<"form" | "envoi" | "ok" | "erreur">("form");
+  const codeTeam = useSearchParams().get("team")?.toUpperCase() ?? null;
+  const [nomTeam, setNomTeam] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!codeTeam) return;
+    createClient().rpc("team_name_from_code", { p_code: codeTeam }).then(({ data }) => setNomTeam((data as string | null) ?? null));
+  }, [codeTeam]);
 
   async function envoyer(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -19,6 +35,7 @@ export default function Rejoindre() {
       phone: String(f.get("tel") || "").trim() || null,
       instagram: String(f.get("insta") || "").trim() || null,
       motivation: String(f.get("why") || "").trim() || null,
+      team_code: nomTeam ? codeTeam : null,
     });
     setEtat(error ? "erreur" : "ok");
   }
@@ -45,6 +62,11 @@ export default function Rejoindre() {
             <p className="label" style={{ margin: 0 }}>Demande d&apos;accès</p>
             <h1 className="serif" style={{ margin: 0, fontSize: 36, lineHeight: 1.05 }}>Le club ne s&apos;ouvre pas à tout le monde.</h1>
             <p style={{ margin: 0, fontSize: 14, lineHeight: 1.55, color: "var(--gris)" }}>Présente-toi. Chaque demande est étudiée personnellement par l&apos;équipe.</p>
+            {nomTeam && (
+              <p style={{ margin: "6px 0 0", padding: "10px 14px", border: "1px dashed var(--bord-rouge)", borderRadius: 12, fontSize: 13 }}>
+                Recommandé par la team <b>{nomTeam}</b>
+              </p>
+            )}
           </div>
 
           <form onSubmit={envoyer} style={{ display: "flex", flexDirection: "column", gap: 14, paddingTop: 24 }}>

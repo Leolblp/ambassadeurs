@@ -1,15 +1,18 @@
 import { requireAdmin } from "@/lib/admin";
 import { numero, pts } from "@/lib/format";
-import { ajusterPoints, changerRole, changerStatutMembre } from "../actions";
+import { affecterEquipe, ajusterPoints, changerRole, changerStatutMembre } from "../actions";
 import { BoutonAction, FormAction } from "../ui";
 
 export default async function Membres() {
   const { supabase } = await requireAdmin();
-  const [{ data: membres }, { data: journal }, { data: ventes }] = await Promise.all([
-    supabase.from("profiles").select("id, first_name, last_name, email, phone, instagram, member_number, promo_code, role, status").order("member_number"),
+  const [{ data: membres }, { data: journal }, { data: ventes }, { data: equipes }] = await Promise.all([
+    supabase.from("profiles").select("id, first_name, last_name, email, phone, instagram, member_number, promo_code, role, status, team_id").order("member_number"),
     supabase.from("points_ledger").select("member_id, delta"),
     supabase.from("sales").select("member_id, ticket_count, status"),
+    supabase.from("teams").select("id, name, leader_id"),
   ]);
+  const nomEquipe = new Map((equipes ?? []).map((t) => [t.id, t.name]));
+  const chefs = new Set((equipes ?? []).map((t) => t.leader_id));
 
   const soldes = new Map<string, number>();
   for (const l of journal ?? []) soldes.set(l.member_id, (soldes.get(l.member_id) ?? 0) + l.delta);
@@ -31,7 +34,7 @@ export default async function Membres() {
                 <b>N° {numero(m.member_number)} · {m.first_name} {m.last_name}</b>
                 {m.role === "admin" && <span className="label" style={{ marginLeft: 8, fontSize: 9 }}>Admin</span>}
                 {m.status === "suspended" && <span className="label-gris" style={{ marginLeft: 8 }}>Suspendu</span>}
-                <span style={{ display: "block", fontSize: 12, color: "var(--gris)", marginTop: 2 }}>{m.promo_code ?? "sans code"} · {billets.get(m.id) ?? 0} billets</span>
+                <span style={{ display: "block", fontSize: 12, color: "var(--gris)", marginTop: 2 }}>{m.promo_code ?? "sans code"} · {billets.get(m.id) ?? 0} billets · {m.team_id ? `team ${nomEquipe.get(m.team_id)}` : "sans équipe"}{chefs.has(m.id) ? " (chef)" : ""}</span>
               </span>
               <span className="display" style={{ fontSize: 22 }}>{pts(soldes.get(m.id) ?? 0)} pts</span>
             </summary>
@@ -42,6 +45,16 @@ export default async function Membres() {
                 {m.phone || "Pas de téléphone"}<br />
                 {m.instagram ? <a href={`https://instagram.com/${m.instagram.replace(/^@/, "")}`} target="_blank" rel="noreferrer">@{m.instagram.replace(/^@/, "")}</a> : "Pas d'Instagram"}
               </div>
+              <FormAction action={affecterEquipe} bouton="Affecter">
+                <input type="hidden" name="member_id" value={m.id} />
+                <div>
+                  <label className="champ-label" htmlFor={`t-${m.id}`}>Équipe</label>
+                  <select className="champ" id={`t-${m.id}`} name="team_id" defaultValue={m.team_id ?? ""}>
+                    <option value="">Sans équipe</option>
+                    {(equipes ?? []).map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+                  </select>
+                </div>
+              </FormAction>
               <FormAction action={ajusterPoints} bouton="Appliquer">
                 <input type="hidden" name="member_id" value={m.id} />
                 <div style={{ display: "grid", gridTemplateColumns: "120px 1fr", gap: 10 }}>

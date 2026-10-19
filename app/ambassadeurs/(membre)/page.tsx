@@ -6,14 +6,17 @@ import Copier from "../_components/Copier";
 export default async function Accueil() {
   const { supabase, user, profil, solde } = await getMembre();
 
-  const [classement, privileges, soiree, missions, preuves, reglages] = await Promise.all([
+  const [classement, privileges, soiree, missions, preuves, reglages, equipes] = await Promise.all([
     supabase.rpc("leaderboard_month"),
     supabase.from("privileges").select("name, cost").eq("is_active", true).order("cost"),
     supabase.from("events").select("id, name, starts_at, ticket_url").gte("starts_at", new Date().toISOString()).order("starts_at").limit(1).maybeSingle(),
     supabase.from("missions").select("id, title, points, deadline, proof_type").eq("is_active", true).order("deadline", { ascending: true, nullsFirst: false }),
     supabase.from("proofs").select("mission_id, status").eq("member_id", user.id),
     supabase.from("app_settings").select("points_per_ticket").single(),
+    profil.team_id ? supabase.rpc("leaderboard_teams_month") : Promise.resolve({ data: [] }),
   ]);
+  const maTeam = ((equipes.data ?? []) as { team_id: string; name: string; rank: number; members: number }[]).find((t) => t.team_id === profil.team_id);
+  const nbTeams = (equipes.data ?? []).length;
 
   const lignes = (classement.data ?? []) as { member_id: string; rank: number }[];
   const moi = lignes.find((l) => l.member_id === user.id);
@@ -66,6 +69,19 @@ export default async function Accueil() {
           <Link href="/ambassadeurs/privileges" style={{ fontSize: 13 }}>Tous les privilèges te sont ouverts →</Link>
         )}
       </section>
+
+      {maTeam && (
+        <section className="carte" style={{ borderRadius: 16, padding: "14px 16px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+          <div>
+            <div className="label-gris">Ta team</div>
+            <div className="display" style={{ fontSize: 22, textTransform: "uppercase", marginTop: 2 }}>{maTeam.name}</div>
+          </div>
+          <div style={{ textAlign: "right" }}>
+            <div className="display" style={{ fontSize: 26, color: "var(--rouge)", lineHeight: 1 }}>#{maTeam.rank}</div>
+            <div style={{ fontSize: 11, color: "var(--gris)" }}>sur {nbTeams} teams</div>
+          </div>
+        </section>
+      )}
 
       {soiree.data && (
         <section style={{ borderRadius: 20, padding: "18px 20px", background: "var(--rouge)", color: "var(--fond)", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>

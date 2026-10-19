@@ -6,7 +6,7 @@ import { BoutonAction } from "../ui";
 export default async function Demandes() {
   const { supabase } = await requireAdmin();
   const [{ data: attente }, { data: traitees }] = await Promise.all([
-    supabase.from("access_requests").select("*").eq("status", "pending").order("created_at"),
+    supabase.from("access_requests").select("*, teams(name)").eq("status", "pending").order("created_at"),
     supabase.from("access_requests").select("id, first_name, last_name, status, reviewed_at").neq("status", "pending").order("reviewed_at", { ascending: false }).limit(15),
   ]);
 
@@ -27,7 +27,7 @@ export default async function Demandes() {
               <article key={d.id} className="carte" style={{ padding: 18, display: "flex", flexDirection: "column", gap: 12 }}>
                 <div>
                   <h2 className="display" style={{ margin: 0, fontSize: 24, fontWeight: 400, textTransform: "uppercase" }}>{d.first_name} {d.last_name}</h2>
-                  <div style={{ fontSize: 12, color: "var(--gris)", marginTop: 4 }}>Reçue {dateCourte(d.created_at)}</div>
+                  <div style={{ fontSize: 12, color: "var(--gris)", marginTop: 4 }}>Reçue {dateCourte(d.created_at)}{(d.teams as { name: string } | null)?.name ? ` · via la team ${(d.teams as { name: string }).name}` : ""}</div>
                 </div>
                 <dl style={{ margin: 0, display: "grid", gridTemplateColumns: "90px 1fr", gap: "6px 10px", fontSize: 14 }}>
                   <dt className="label-gris" style={{ paddingTop: 3 }}>Instagram</dt>
