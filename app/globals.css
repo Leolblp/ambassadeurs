@@ -1,0 +1,117 @@
+:root {
+  --fond: #0c0707;
+  --carte: #150c0c;
+  --encre: #f5ebeb;
+  --rouge: #ff1a1a;
+  --gris: #9b8b8b;
+  --bord: #2c1c1c;
+  --bord-rouge: #4a1414;
+  --vert: #3ddc84;
+  --ambre: #ffb020;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  background: var(--fond);
+  color: var(--encre);
+  font-family: var(--font-body), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--encre); }
+a:hover { color: var(--rouge); }
+:focus-visible { outline: 2px solid var(--encre); outline-offset: 3px; }
+
+.grain {
+  background-image: radial-gradient(rgba(245, 235, 235, 0.05) 1px, transparent 1px);
+  background-size: 3px 3px;
+}
+
+.label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--rouge);
+}
+
+.label-gris {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gris);
+}
+
+.serif {
+  font-family: var(--font-serif), Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+}
+
+.display {
+  font-family: var(--font-display), Impact, sans-serif;
+  letter-spacing: 0.02em;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 54px;
+  padding: 0 32px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--rouge);
+  color: var(--fond);
+  font: 800 13px var(--font-body), system-ui, sans-serif;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.btn:hover { background: var(--encre); color: var(--fond); }
+.btn:disabled { opacity: 0.5; cursor: default; }
+
+.champ {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 14px;
+  background: var(--carte);
+  border: 1px solid var(--bord);
+  border-radius: 12px;
+  color: var(--encre);
+  font: 500 15px var(--font-body), system-ui, sans-serif;
+}
+.champ:focus { outline: none; border-color: var(--rouge); }
+.champ::placeholder { color: #7d6c6c; }
+
+.champ-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gris);
+}
+
+.carte {
+  background: var(--carte);
+  border: 1px solid var(--bord);
+  border-radius: 20px;
+}
+
+.ecran {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100dvh;
+  padding: 24px 20px 40px;
+  display: flex;
+  flex-direction: column;
+}
