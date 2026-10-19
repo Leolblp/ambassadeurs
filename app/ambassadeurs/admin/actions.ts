@@ -49,10 +49,10 @@ export async function accepterDemande(id: string): Promise<Resultat> {
 
   // 1. Création du compte + email d'invitation (le profil est créé automatiquement)
   const h = await headers();
-  const origine = process.env.NEXT_PUBLIC_SITE_URL || `https://${h.get("host")}`;
+  const origine = h.get("host") ? `https://${h.get("host")}` : process.env.NEXT_PUBLIC_SITE_URL;
   const { data: cree, error: errCreation } = await admin.auth.admin.inviteUserByEmail(d.email, {
     data: { first_name: d.first_name, last_name: d.last_name, phone: d.phone, instagram: d.instagram },
-    redirectTo: `${origine}/ambassadeurs`,
+    redirectTo: `${origine}/ambassadeurs/auth/bienvenue`,
   });
   if (errCreation || !cree.user) {
     return { ok: false, message: errCreation?.message.toLowerCase().includes("already") ? "Cet email a déjà un compte." : "Création du compte impossible : " + errCreation?.message };
