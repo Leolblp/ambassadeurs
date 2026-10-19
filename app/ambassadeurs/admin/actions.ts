@@ -154,6 +154,14 @@ export async function changerStatutMembre(id: string, statut: "active" | "suspen
   return error ? { ok: false, message: error.message } : { ok: true, message: statut === "active" ? "Membre réactivé." : "Membre suspendu." };
 }
 
+export async function changerRole(id: string, role: "member" | "admin"): Promise<Resultat> {
+  const { supabase, user } = await requireAdmin();
+  if (id === user.id && role === "member") return { ok: false, message: "Tu ne peux pas retirer ton propre accès admin." };
+  const { error } = await supabase.from("profiles").update({ role }).eq("id", id);
+  revalidatePath("/ambassadeurs/admin/membres");
+  return error ? { ok: false, message: error.message } : { ok: true, message: role === "admin" ? "Accès admin donné." : "Accès admin retiré." };
+}
+
 /* ---------- Privilèges ---------- */
 
 export async function remettrePrivilege(id: string): Promise<Resultat> {

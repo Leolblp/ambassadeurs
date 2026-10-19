@@ -1,6 +1,6 @@
 import { requireAdmin } from "@/lib/admin";
 import { numero, pts } from "@/lib/format";
-import { ajusterPoints, changerStatutMembre } from "../actions";
+import { ajusterPoints, changerRole, changerStatutMembre } from "../actions";
 import { BoutonAction, FormAction } from "../ui";
 
 export default async function Membres() {
@@ -49,6 +49,12 @@ export default async function Membres() {
                   <div><label className="champ-label" htmlFor={`n-${m.id}`}>Raison (visible par le membre)</label><input className="champ" id={`n-${m.id}`} name="note" placeholder="Bonus soirée d'ouverture" /></div>
                 </div>
               </FormAction>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <BoutonAction
+                action={changerRole.bind(null, m.id, m.role === "admin" ? "member" : "admin")}
+                label={m.role === "admin" ? "Retirer l'accès admin" : "Passer admin"}
+                confirmer={m.role === "admin" ? `Retirer l'accès back-office à ${m.first_name} ?` : `Donner l'accès au back-office à ${m.first_name} ? Il pourra valider les preuves, accepter des membres et gérer les points.`}
+              />
               {m.role === "member" && (
                 <BoutonAction
                   action={changerStatutMembre.bind(null, m.id, m.status === "active" ? "suspended" : "active")}
@@ -56,6 +62,7 @@ export default async function Membres() {
                   confirmer={m.status === "active" ? `Suspendre ${m.first_name} ? Il n'apparaîtra plus dans le classement.` : undefined}
                 />
               )}
+              </div>
             </div>
           </details>
         ))}
