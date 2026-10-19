@@ -84,7 +84,7 @@ function Formulaire() {
             <button className="btn" type="submit" disabled={etat === "envoi"} style={{ width: "100%", marginTop: 8 }}>
               {etat === "envoi" ? "Envoi…" : "Envoyer ma demande"}
             </button>
-            <p style={{ margin: 0, textAlign: "center", fontSize: 12, color: "var(--gris)" }}>Réponse sous 72 h · places limitées</p>
+            <p style={{ margin: 0, textAlign: "center", fontSize: 12, color: "var(--gris)" }}>Réponse sous 72 h · places limitées · <Link href="/ambassadeurs/faq" style={{ color: "var(--gris)" }}>Questions fréquentes</Link></p>
           </form>
         </>
       )}

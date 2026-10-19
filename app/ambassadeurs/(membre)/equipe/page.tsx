@@ -67,6 +67,7 @@ export default async function MaTeam() {
       <div>
         <p className="label" style={{ margin: 0 }}>Chef d&apos;équipe</p>
         <h1 className="display" style={{ margin: "6px 0 0", fontSize: 38, lineHeight: 1, textTransform: "uppercase", fontWeight: 400 }}>{team.name}</h1>
+        <a href="/ambassadeurs/equipe/guide" style={{ display: "inline-block", marginTop: 10, fontSize: 13 }}>Lire le guide du chef d&apos;équipe →</a>
       </div>
 
       <section style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 8 }}>
