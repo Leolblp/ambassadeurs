@@ -66,7 +66,9 @@ export async function genererPass(memberId: string): Promise<Buffer> {
   const fin = debut ? new Date(debut.getTime() + 8 * 3600 * 1000) : null;
   const ceSoir = !!(ouverture && fin && Date.now() >= ouverture.getTime() && Date.now() < fin.getTime());
   const champSoiree = soiree
-    ? { key: "soiree", label: "SOIRÉE", value: ceSoir ? `Ce soir · ${soiree.name}` : `${new Date(soiree.starts_at).toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short", timeZone: "Europe/Paris" })} · ${soiree.name}`, changeMessage: "%@ à La Commerciale. Ta carte XOXO Club est prête." }
+    ? ceSoir
+      ? { key: "soiree", label: "SOIRÉE", value: "Ce soir · La Commerciale", changeMessage: "%@. Ta carte XOXO Club est prête." }
+      : { key: "soiree", label: "SOIRÉE", value: `${new Date(soiree.starts_at).toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short", timeZone: "Europe/Paris" })} · ${soiree.name}` }
     : null;
 
   const passJson = {
