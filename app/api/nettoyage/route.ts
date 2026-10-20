@@ -39,5 +39,33 @@ export async function GET(request: NextRequest) {
     supprimes += lot.length;
   }
 
-  return NextResponse.json({ verifies: data?.length ?? 0, supprimes });
+  // Durées de conservation annoncées dans la politique de confidentialité
+  const unAn = new Date(Date.now() - 365 * 24 * 3600 * 1000).toISOString();
+  await admin.from("access_requests").delete().eq("status", "refused").lt("created_at", unAn);
+  await admin.from("whatsapp_log").delete().lt("created_at", unAn);
+
+  // Comptes membres sans connexion depuis 3 ans (jamais les admins)
+  const troisAns = Date.now() - 3 * 365 * 24 * 3600 * 1000;
+  let inactifs = 0;
+  for (let page = 1; page < 50; page++) {
+    const { data: lot } = await admin.auth.admin.listUsers({ page, perPage: 1000 });
+    const users = lot?.users ?? [];
+    for (const u of users) {
+      const derniere = new Date(u.last_sign_in_at ?? u.created_at).getTime();
+      if (derniere > troisAns) continue;
+      const { data: p } = await admin.from("profiles").select("role").eq("id", u.id).maybeSingle();
+      if (p?.role === "admin") continue;
+      await Promise.all([
+        admin.from("points_ledger").update({ created_by: null }).eq("created_by", u.id),
+        admin.from("proofs").update({ reviewed_by: null }).eq("reviewed_by", u.id),
+        admin.from("access_requests").update({ reviewed_by: null }).eq("reviewed_by", u.id),
+      ]);
+      if (u.email) await admin.from("access_requests").delete().eq("email", u.email);
+      const { error: e } = await admin.auth.admin.deleteUser(u.id);
+      if (!e) inactifs++;
+    }
+    if (users.length < 1000) break;
+  }
+
+  return NextResponse.json({ verifies: data?.length ?? 0, supprimes, inactifs });
 }

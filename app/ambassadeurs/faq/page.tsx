@@ -56,7 +56,7 @@ const BLOCS: { titre: string; questions: { q: string; r: React.ReactNode }[] }[]
     questions: [
       { q: "Qui voit mes informations ?", r: <p style={{ margin: 0 }}>Seule l&apos;équipe de La Commerciale, et ton chef d&apos;équipe pour ce qui concerne ta team. Les autres membres ne voient que ton prénom et l&apos;initiale de ton nom dans le classement.</p> },
       { q: "Que deviennent mes captures ?", r: <p style={{ margin: 0 }}>Elles servent uniquement à valider tes missions, et sont supprimées automatiquement 5 jours après la soirée. Tes points, eux, restent.</p> },
-      { q: "Comment quitter le club ?", r: <p style={{ margin: 0 }}>Écris à l&apos;équipe de La Commerciale : ton compte et tes données seront supprimés.</p> },
+      { q: "Comment quitter le club ?", r: <p style={{ margin: 0 }}>Écris à <a href="mailto:xoxo@lacom.club">xoxo@lacom.club</a> : ton compte et tes données seront supprimés. Détails dans la <Link href="/ambassadeurs/confidentialite">politique de confidentialité</Link>.</p> },
     ],
   },
 ];
@@ -81,6 +81,9 @@ export default function Faq() {
       ))}
 
       <p style={{ margin: 0, fontSize: 13, color: "var(--gris)", textAlign: "center" }}>Une autre question ? Écris à l&apos;équipe de La Commerciale sur Instagram.</p>
+      <p style={{ margin: 0, fontSize: 12, color: "var(--gris)", textAlign: "center" }}>
+        <Link href="/ambassadeurs/mentions-legales" style={{ color: "var(--gris)" }}>Mentions légales</Link> · <Link href="/ambassadeurs/confidentialite" style={{ color: "var(--gris)" }}>Confidentialité</Link>
+      </p>
     </div>
   );
 }

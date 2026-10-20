@@ -97,6 +97,9 @@ export default async function Carte() {
         <a href="/ambassadeurs/admin" className="btn" style={{ alignSelf: "center" }}>Back-office équipe</a>
       )}
       <a href="/ambassadeurs/faq" style={{ alignSelf: "center", fontSize: 14 }}>Questions fréquentes</a>
+      <p style={{ alignSelf: "center", margin: 0, fontSize: 12 }}>
+        <a href="/ambassadeurs/mentions-legales" style={{ color: "var(--gris)" }}>Mentions légales</a> · <a href="/ambassadeurs/confidentialite" style={{ color: "var(--gris)" }}>Confidentialité</a>
+      </p>
       <Deconnexion />
     </div>
   );

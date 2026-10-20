@@ -84,6 +84,11 @@ function Formulaire() {
             </label>
             <div><label className="champ-label" htmlFor="why">Pourquoi toi ?</label><textarea className="champ" id="why" name="why" rows={3} placeholder="Ton univers, ta team, ce que tu apporterais au club." style={{ resize: "vertical" }} /></div>
 
+            <label style={{ display: "flex", gap: 10, alignItems: "flex-start", fontSize: 13, lineHeight: 1.45, color: "var(--gris)", cursor: "pointer" }}>
+              <input type="checkbox" name="cgu" required style={{ marginTop: 3, width: 18, height: 18, accentColor: "var(--rouge)", flex: "none" }} />
+              <span>J&apos;ai 18 ans ou plus et j&apos;accepte la <Link href="/ambassadeurs/confidentialite" target="_blank" style={{ color: "var(--encre)" }}>politique de confidentialité</Link> et les <Link href="/ambassadeurs/mentions-legales" target="_blank" style={{ color: "var(--encre)" }}>conditions du club</Link>.</span>
+            </label>
+
             {etat === "erreur" && <p role="alert" style={{ margin: 0, color: "var(--rouge)", fontSize: 14 }}>L&apos;envoi n&apos;a pas abouti. Réessaie dans un instant.</p>}
 
             <button className="btn" type="submit" disabled={etat === "envoi"} style={{ width: "100%", marginTop: 8 }}>

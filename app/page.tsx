@@ -42,6 +42,9 @@ export default function Entree() {
         <span>Places limitées</span>
         <span aria-hidden="true" style={{ color: "var(--rouge)" }}>✕</span>
         <span>Privilèges réservés aux membres</span>
+        <span style={{ flexBasis: "100%", textAlign: "center", letterSpacing: ".08em", textTransform: "none" }}>
+          <Link href="/ambassadeurs/mentions-legales" style={{ color: "var(--gris)" }}>Mentions légales</Link> · <Link href="/ambassadeurs/confidentialite" style={{ color: "var(--gris)" }}>Confidentialité</Link>
+        </span>
       </footer>
     </div>
   );
