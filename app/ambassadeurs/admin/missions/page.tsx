@@ -31,7 +31,7 @@ export default async function Missions() {
       <section style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         <div>
           <h2 className="label" style={{ margin: 0 }}>Modèles prêts à publier</h2>
-          <p style={{ margin: "6px 0 0", fontSize: 13, color: "var(--gris)" }}>Un clic publie la mission, liée automatiquement à la prochaine soirée (échéance = début de la soirée).</p>
+          <p style={{ margin: "6px 0 0", fontSize: 13, color: "var(--gris)" }}>Un clic publie la mission, liée automatiquement à la prochaine soirée (échéance au début de la soirée, ou après pour les missions pendant et après la soirée).</p>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 10 }}>
           {MODELES_MISSIONS.map((m, i) => (

@@ -121,7 +121,7 @@ export async function publierModele(index: number): Promise<Resultat> {
   const { data: soiree } = await supabase.from("events").select("id, starts_at").gte("starts_at", new Date().toISOString()).order("starts_at").limit(1).maybeSingle();
   const { error } = await supabase.from("missions").insert({
     title: m.title, description: m.description, points: m.points, proof_type: m.proof_type,
-    event_id: soiree?.id ?? null, deadline: soiree?.starts_at ?? null,
+    event_id: soiree?.id ?? null, deadline: soiree ? new Date(new Date(soiree.starts_at).getTime() + m.delai_h * 3600000).toISOString() : null,
   });
   revalidatePath("/ambassadeurs/admin/missions");
   return error ? { ok: false, message: error.message } : { ok: true, message: soiree ? "Publiée, liée à la prochaine soirée." : "Publiée (aucune soirée à venir à lier)." };
