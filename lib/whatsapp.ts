@@ -124,7 +124,18 @@ export async function diagnostic() {
     const w = await lire(`${GRAPH}/${id}?fields=id,name,phone_numbers{id,display_phone_number}`);
     if (w?.id) comptes.push({ id: w.id, nom: w.name, numeros: (w.phone_numbers?.data ?? []).map((n: { id: string; display_phone_number: string }) => `${n.display_phone_number} (${n.id})`).join(", ") });
   }
+  const waba = await lire(`${GRAPH}/${process.env.WHATSAPP_WABA_ID}?fields=id,name`);
+  const wabaNumeros = await lire(`${GRAPH}/${process.env.WHATSAPP_WABA_ID}/phone_numbers?fields=id,display_phone_number`);
+  const moi = await lire(`${GRAPH}/me?fields=id,name`);
+  const proprio = await lire(`${GRAPH}/557650655108251/owned_whatsapp_business_accounts?fields=id,name`);
+  const clients = await lire(`${GRAPH}/557650655108251/client_whatsapp_business_accounts?fields=id,name`);
+  const court = (j: { error?: { message?: string; code?: number }; data?: unknown }) => (j?.error ? `Erreur ${j.error.code} : ${j.error.message}` : j?.data ?? j);
   return {
+    waba: court(waba),
+    wabaNumeros: court(wabaNumeros),
+    moi: court(moi),
+    wabaPossedes: court(proprio),
+    wabaClients: court(clients),
     tokenFinPar: token.slice(-6),
     wabaConfigure: process.env.WHATSAPP_WABA_ID,
     portees: portees.map((p) => `${p.scope} : ${(p.target_ids ?? ["tous"]).join(", ")}`),
