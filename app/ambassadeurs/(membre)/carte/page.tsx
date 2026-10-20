@@ -40,6 +40,11 @@ export default async function Carte() {
         </div>
       </div>
 
+      <a href="/api/wallet/pass" style={{ alignSelf: "center", display: "inline-flex", alignItems: "center", gap: 10, minHeight: 48, padding: "0 22px", borderRadius: 12, background: "#000", color: "#fff", border: "1px solid #3a3a3a", fontWeight: 700, fontSize: 15, textDecoration: "none" }}>
+        <svg width="22" height="18" viewBox="0 0 22 18" aria-hidden="true"><rect x="1" y="1" width="20" height="16" rx="3" fill="none" stroke="#fff" strokeWidth="1.6" /><path d="M1 6h20M1 10h20" stroke="#ff1a1a" strokeWidth="1.6" /></svg>
+        Ajouter à Apple Wallet
+      </a>
+
       {profil.promo_code && (
         <section style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, padding: "14px 16px", border: "1px dashed var(--bord-rouge)", borderRadius: 14 }}>
           <div>
