@@ -33,6 +33,7 @@ function Formulaire() {
       last_name: String(f.get("nom") || "").trim(),
       email: String(f.get("email") || "").trim().toLowerCase(),
       phone: String(f.get("tel") || "").trim() || null,
+      whatsapp_optin: f.get("whatsapp") === "on",
       instagram: String(f.get("insta") || "").trim() || null,
       motivation: String(f.get("why") || "").trim() || null,
       team_code: nomTeam ? codeTeam : null,
@@ -76,7 +77,11 @@ function Formulaire() {
             </div>
             <div><label className="champ-label" htmlFor="insta">Instagram</label><input className="champ" id="insta" name="insta" placeholder="@toncompte" required /></div>
             <div><label className="champ-label" htmlFor="email">Email</label><input className="champ" id="email" name="email" type="email" required autoComplete="email" /></div>
-            <div><label className="champ-label" htmlFor="tel">Téléphone</label><input className="champ" id="tel" name="tel" type="tel" autoComplete="tel" /></div>
+            <div><label className="champ-label" htmlFor="tel">Téléphone (WhatsApp)</label><input className="champ" id="tel" name="tel" type="tel" autoComplete="tel" required placeholder="06 12 34 56 78" /></div>
+            <label style={{ display: "flex", gap: 10, alignItems: "flex-start", fontSize: 13, lineHeight: 1.45, color: "var(--gris)", cursor: "pointer" }}>
+              <input type="checkbox" name="whatsapp" style={{ marginTop: 3, width: 18, height: 18, accentColor: "var(--rouge)", flex: "none" }} />
+              <span>J&apos;accepte de recevoir sur WhatsApp les messages du XOXO Club (missions, points, privilèges). Désactivable à tout moment depuis ma carte.</span>
+            </label>
             <div><label className="champ-label" htmlFor="why">Pourquoi toi ?</label><textarea className="champ" id="why" name="why" rows={3} placeholder="Ton univers, ta team, ce que tu apporterais au club." style={{ resize: "vertical" }} /></div>
 
             {etat === "erreur" && <p role="alert" style={{ margin: 0, color: "var(--rouge)", fontSize: 14 }}>L&apos;envoi n&apos;a pas abouti. Réessaie dans un instant.</p>}

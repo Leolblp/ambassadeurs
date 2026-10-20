@@ -2,6 +2,7 @@ import Image from "next/image";
 import { getMembre, numero, pts, RAISON } from "@/lib/membre";
 import Copier from "../../_components/Copier";
 import Deconnexion from "./Deconnexion";
+import ReglageWhatsApp from "./ReglageWhatsApp";
 
 export default async function Carte() {
   const { supabase, user, profil, solde } = await getMembre();
@@ -70,6 +71,8 @@ export default async function Carte() {
           ))
         )}
       </section>
+
+      <ReglageWhatsApp tel={profil.phone ?? null} optin={!!profil.whatsapp_optin} />
 
       {profil.role === "admin" && (
         <a href="/ambassadeurs/admin" className="btn" style={{ alignSelf: "center" }}>Back-office équipe</a>

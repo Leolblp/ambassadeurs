@@ -20,6 +20,7 @@ const BLOCS: { titre: string; questions: { q: string; r: React.ReactNode }[] }[]
       { q: "Comment je me connecte ?", r: <p style={{ margin: 0 }}>Sur <Link href="/ambassadeurs/connexion">lacom.club/ambassadeurs/connexion</Link>, entre ton email : tu reçois un lien de connexion. Pas de mot de passe à retenir.</p> },
       { q: "Je ne reçois pas l'email de connexion.", r: <><p style={{ margin: 0 }}>Regarde dans tes spams ou « Promotions ». L&apos;email vient de <b>xoxo@lacom.club</b> : ajoute cette adresse à tes contacts.</p><p style={{ margin: 0 }}>Vérifie aussi que tu utilises l&apos;email de ta demande d&apos;accès.</p></> },
       { q: "Mon lien ne marche plus.", r: <p style={{ margin: 0 }}>Un lien est valable une heure et ne sert qu&apos;une fois. Redemande-en un depuis la page de connexion.</p> },
+      { q: "Je reçois des messages WhatsApp du club ?", r: <p style={{ margin: 0 }}>Si tu l&apos;as accepté : nouvelles missions, rappels avant échéance, preuves validées ou à refaire. Tu peux activer, désactiver ou changer ton numéro à tout moment dans Ma carte.</p> },
       { q: "Je peux l'installer comme une app ?", r: <p style={{ margin: 0 }}>Oui. Sur iPhone : Safari, bouton Partager, « Sur l&apos;écran d&apos;accueil ». Sur Android : Chrome, menu ⋮, « Ajouter à l&apos;écran d&apos;accueil ».</p> },
     ],
   },

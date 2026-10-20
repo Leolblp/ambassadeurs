@@ -5,6 +5,8 @@ export type Profil = {
   id: string;
   first_name: string | null;
   last_name: string | null;
+  phone: string | null;
+  whatsapp_optin: boolean;
   member_number: number | null;
   promo_code: string | null;
   role: "member" | "admin";
@@ -21,7 +23,7 @@ export async function getMembre() {
 
   const { data: profil } = await supabase
     .from("profiles")
-    .select("id, first_name, last_name, member_number, promo_code, role, created_at, team_id")
+    .select("id, first_name, last_name, member_number, promo_code, role, created_at, team_id, phone, whatsapp_optin")
     .eq("id", user.id)
     .single<Profil>();
 

@@ -1,6 +1,7 @@
 {
   "regions": ["dub1"],
   "crons": [
-    { "path": "/api/nettoyage", "schedule": "0 3 * * *" }
+    { "path": "/api/nettoyage", "schedule": "0 3 * * *" },
+    { "path": "/api/whatsapp-rappels", "schedule": "0 15 * * *" }
   ]
 }

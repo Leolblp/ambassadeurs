@@ -1,6 +1,6 @@
 import { requireAdmin } from "@/lib/admin";
 import { dateCourte, PREUVE } from "@/lib/format";
-import { basculerMission, creerMission, publierModele } from "../actions";
+import { annoncerMission, basculerMission, creerMission, publierModele } from "../actions";
 import { MODELES_MISSIONS } from "@/lib/modeles";
 import { BoutonAction, CopierTexte, FormAction } from "../ui";
 
@@ -87,7 +87,9 @@ export default async function Missions() {
                 </div>
               </div>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "flex-start" }}>
-                {m.is_active && <CopierTexte texte={annonce} label="Message WhatsApp" />}
+                {m.is_active && !m.notified_at && <BoutonAction action={annoncerMission.bind(null, m.id)} label="Prévenir sur WhatsApp" variante="plein" />}
+                {m.notified_at && <span style={{ alignSelf: "center", fontSize: 12, color: "var(--vert)" }}>Annoncée le {dateCourte(m.notified_at)}</span>}
+                {m.is_active && <CopierTexte texte={annonce} label="Texte pour le groupe" />}
                 <BoutonAction action={basculerMission.bind(null, m.id, !m.is_active)} label={m.is_active ? "Archiver" : "Réactiver"} />
               </div>
             </article>

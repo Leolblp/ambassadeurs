@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { requireAdmin, requireStaff, codeDepuisPrenom, codeEquipe } from "@/lib/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { after } from "next/server";
+import { envoyerWhatsApp, jourMois } from "@/lib/whatsapp";
 
 export type Resultat = { ok: boolean; message: string } | null;
 
@@ -19,9 +21,23 @@ function heureLyon(saisie: string) {
 
 /* ---------- Preuves ---------- */
 
+/** Prévient le membre sur WhatsApp, après la réponse (n'allonge pas le clic). */
+function notifierPreuve(id: string, valide: boolean, motif?: string) {
+  after(async () => {
+    const admin = createAdminClient();
+    const { data: p } = await admin.from("proofs").select("member_id, missions(title, points), profiles!proofs_member_id_fkey(id, first_name, phone, whatsapp_optin)").eq("id", id).single();
+    const m = p?.missions as unknown as { title: string; points: number } | null;
+    const membre = p?.profiles as unknown as { id: string; first_name: string | null; phone: string | null; whatsapp_optin: boolean } | null;
+    if (!m || !membre) return;
+    if (valide) await envoyerWhatsApp(membre, "xoxo_preuve_validee", [membre.first_name || "toi", m.title, m.points]);
+    else await envoyerWhatsApp(membre, "xoxo_preuve_refusee", [membre.first_name || "toi", m.title, motif || "preuve non conforme"]);
+  });
+}
+
 export async function validerPreuve(id: string): Promise<Resultat> {
   const { supabase } = await requireStaff();
   const { error } = await supabase.rpc("approve_proof", { p_proof: id });
+  if (!error) notifierPreuve(id, true);
   revalidatePath("/ambassadeurs/admin");
   revalidatePath("/ambassadeurs/equipe");
   return error ? { ok: false, message: "Validation impossible : " + error.message } : { ok: true, message: "Preuve validée, points crédités." };
@@ -29,7 +45,9 @@ export async function validerPreuve(id: string): Promise<Resultat> {
 
 export async function refuserPreuve(id: string, message: string): Promise<Resultat> {
   const { supabase } = await requireStaff();
-  const { error } = await supabase.rpc("refuse_proof", { p_proof: id, p_message: message || "Preuve non conforme, renvoie-en une." });
+  const motif = message || "Preuve non conforme, renvoie-en une.";
+  const { error } = await supabase.rpc("refuse_proof", { p_proof: id, p_message: motif });
+  if (!error) notifierPreuve(id, false, motif);
   revalidatePath("/ambassadeurs/admin");
   revalidatePath("/ambassadeurs/equipe");
   return error ? { ok: false, message: "Refus impossible : " + error.message } : { ok: true, message: "Preuve refusée, le membre est prévenu." };
@@ -69,7 +87,9 @@ export async function accepterDemande(id: string): Promise<Resultat> {
     if (!pris) break;
     code = base.replace("-XOXO", `${i}-XOXO`);
   }
-  await admin.from("profiles").update({ promo_code: code, team_id: d.team_id ?? null }).eq("id", cree.user.id);
+  await admin.from("profiles").update({ promo_code: code, team_id: d.team_id ?? null, whatsapp_optin: !!d.whatsapp_optin }).eq("id", cree.user.id);
+  const nouveau = { id: cree.user.id, phone: d.phone, whatsapp_optin: !!d.whatsapp_optin };
+  after(() => envoyerWhatsApp(nouveau, "xoxo_acces_accepte", [d.first_name || "toi"]));
 
   // 3. Demande marquée acceptée
   await supabase.from("access_requests").update({ status: "accepted", reviewed_by: user.id, reviewed_at: new Date().toISOString() }).eq("id", id);
@@ -112,6 +132,25 @@ export async function supprimerSoiree(id: string): Promise<Resultat> {
 }
 
 /* ---------- Missions ---------- */
+
+export async function annoncerMission(id: string): Promise<Resultat> {
+  const { supabase } = await requireAdmin();
+  const { data: m } = await supabase.from("missions").select("title, points, deadline, is_active, notified_at").eq("id", id).single();
+  if (!m || !m.is_active) return { ok: false, message: "Mission introuvable ou archivée." };
+  if (m.notified_at) return { ok: false, message: "Déjà annoncée sur WhatsApp." };
+  if (!process.env.WHATSAPP_TOKEN) return { ok: false, message: "WhatsApp n'est pas configuré (WHATSAPP_TOKEN absent sur Vercel)." };
+  const admin = createAdminClient();
+  const { data: membres } = await admin.from("profiles").select("id, first_name, phone, whatsapp_optin").eq("status", "active").eq("whatsapp_optin", true).not("phone", "is", null);
+  await supabase.from("missions").update({ notified_at: new Date().toISOString() }).eq("id", id);
+  const liste = membres ?? [];
+  after(async () => {
+    for (const mb of liste) {
+      await envoyerWhatsApp(mb, "xoxo_nouvelle_mission", [mb.first_name || "toi", m.title, m.points, m.deadline ? jourMois(m.deadline) : "la fin de la semaine"]);
+    }
+  });
+  revalidatePath("/ambassadeurs/admin/missions");
+  return { ok: true, message: `Annonce en cours d'envoi à ${liste.length} membre${liste.length > 1 ? "s" : ""}.` };
+}
 
 export async function publierModele(index: number): Promise<Resultat> {
   const { supabase } = await requireAdmin();
