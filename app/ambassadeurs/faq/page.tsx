@@ -27,7 +27,7 @@ const BLOCS: { titre: string; questions: { q: string; r: React.ReactNode }[] }[]
     titre: "Missions et points",
     questions: [
       { q: "Comment je gagne des points ?", r: <p style={{ margin: 0 }}>En réalisant les missions (onglet Missions) et en faisant venir du monde avec ton code : chaque billet acheté avec ton code te rapporte des points.</p> },
-      { q: "Comment j'envoie une preuve ?", r: <p style={{ margin: 0 }}>Dans Missions, touche « Envoyer ma preuve » et choisis ta capture d&apos;écran. Pour une vidéo (story, TikTok, réel), envoie la capture et colle le lien de la vidéo : on n&apos;envoie jamais le fichier vidéo lui-même.</p> },
+      { q: "Comment j'envoie une preuve ?", r: <p style={{ margin: 0 }}>Dans Missions, touche « Envoyer ma preuve » et choisis ta capture d&apos;écran. Pour une story, la capture suffit. Pour un TikTok ou un réel, envoie la capture et colle le lien de la vidéo : on n&apos;envoie jamais le fichier vidéo lui-même.</p> },
       { q: "Quand mes points sont-ils crédités ?", r: <p style={{ margin: 0 }}>Dès que l&apos;équipe ou ton chef d&apos;équipe valide ta preuve, en général sous 48 h. Tu la retrouves alors dans l&apos;onglet « Validées ».</p> },
       { q: "Ma preuve a été refusée, pourquoi ?", r: <p style={{ margin: 0 }}>Le motif est écrit sur la mission. Le plus souvent : story en « amis proches », affiche coupée ou preuve trop ancienne. Corrige et renvoie une preuve, c&apos;est possible tant que la mission est ouverte.</p> },
       { q: "Mes points expirent-ils ?", r: <p style={{ margin: 0 }}>Non, ton solde reste acquis. Seul le classement du mois repart à zéro chaque début de mois.</p> },
