@@ -1,6 +1,7 @@
 import { requireAdmin } from "@/lib/admin";
 import { dateCourte, PREUVE } from "@/lib/format";
-import { basculerMission, creerMission } from "../actions";
+import { basculerMission, creerMission, publierModele } from "../actions";
+import { MODELES_MISSIONS } from "@/lib/modeles";
 import { BoutonAction, CopierTexte, FormAction } from "../ui";
 
 export default async function Missions() {
@@ -27,8 +28,27 @@ export default async function Missions() {
         <h1 className="serif" style={{ margin: "6px 0 0", fontSize: 40, lineHeight: 1 }}>Donner le tempo</h1>
       </header>
 
+      <section style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <div>
+          <h2 className="label" style={{ margin: 0 }}>Modèles prêts à publier</h2>
+          <p style={{ margin: "6px 0 0", fontSize: 13, color: "var(--gris)" }}>Un clic publie la mission, liée automatiquement à la prochaine soirée (échéance = début de la soirée).</p>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 10 }}>
+          {MODELES_MISSIONS.map((m, i) => (
+            <div key={m.title} className="carte" style={{ borderRadius: 14, padding: 14, display: "flex", flexDirection: "column", gap: 8 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+                <b style={{ fontSize: 14 }}>{m.title}</b>
+                <span style={{ flex: "none", fontSize: 12, fontWeight: 800 }}>+{m.points}</span>
+              </div>
+              <div style={{ fontSize: 12, color: "var(--gris)" }}>Preuve : {PREUVE[m.proof_type]}</div>
+              <div><BoutonAction action={publierModele.bind(null, i)} label="Publier" variante="plein" /></div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       <section className="carte" style={{ padding: 20, maxWidth: 640 }}>
-        <h2 className="label" style={{ margin: "0 0 14px" }}>Nouvelle mission</h2>
+        <h2 className="label" style={{ margin: "0 0 14px" }}>Mission sur mesure</h2>
         <FormAction action={creerMission} bouton="Publier la mission">
           <div><label className="champ-label" htmlFor="title">Titre</label><input className="champ" id="title" name="title" required placeholder="Partage l'affiche en story" /></div>
           <div><label className="champ-label" htmlFor="description">Consigne</label><textarea className="champ" id="description" name="description" rows={2} placeholder="Ce qu'il faut faire précisément" /></div>

@@ -113,6 +113,20 @@ export async function supprimerSoiree(id: string): Promise<Resultat> {
 
 /* ---------- Missions ---------- */
 
+export async function publierModele(index: number): Promise<Resultat> {
+  const { supabase } = await requireAdmin();
+  const { MODELES_MISSIONS } = await import("@/lib/modeles");
+  const m = MODELES_MISSIONS[index];
+  if (!m) return { ok: false, message: "Modèle introuvable." };
+  const { data: soiree } = await supabase.from("events").select("id, starts_at").gte("starts_at", new Date().toISOString()).order("starts_at").limit(1).maybeSingle();
+  const { error } = await supabase.from("missions").insert({
+    title: m.title, description: m.description, points: m.points, proof_type: m.proof_type,
+    event_id: soiree?.id ?? null, deadline: soiree?.starts_at ?? null,
+  });
+  revalidatePath("/ambassadeurs/admin/missions");
+  return error ? { ok: false, message: error.message } : { ok: true, message: soiree ? "Publiée, liée à la prochaine soirée." : "Publiée (aucune soirée à venir à lier)." };
+}
+
 export async function creerMission(_: Resultat, f: FormData): Promise<Resultat> {
   const { supabase } = await requireAdmin();
   const titre = txt(f, "title");
