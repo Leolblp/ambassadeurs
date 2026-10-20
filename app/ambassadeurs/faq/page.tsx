@@ -18,7 +18,7 @@ const BLOCS: { titre: string; questions: { q: string; r: React.ReactNode }[] }[]
     titre: "Mon accès",
     questions: [
       { q: "Comment je me connecte ?", r: <p style={{ margin: 0 }}>Sur <Link href="/ambassadeurs/connexion">lacom.club/ambassadeurs/connexion</Link>, entre ton numéro : tu reçois un code à 6 chiffres sur WhatsApp. Pas de mot de passe à retenir. Tu peux aussi demander un lien par email.</p> },
-      { q: "Je ne reçois pas mon code ou mon email de connexion.", r: <><p style={{ margin: 0 }}>Pour WhatsApp, vérifie que tu utilises le numéro donné lors de ta demande d&apos;accès (modifiable dans Ma carte). Pour l&apos;email, regarde dans tes spams ou « Promotions ». L&apos;email vient de <b>xoxo@lacom.club</b> : ajoute cette adresse à tes contacts.</p><p style={{ margin: 0 }}>Vérifie aussi que tu utilises l&apos;email de ta demande d&apos;accès.</p></> },
+      { q: "Je ne reçois pas mon code ou mon email de connexion.", r: <><p style={{ margin: 0 }}>Pour WhatsApp, vérifie que tu utilises le numéro donné lors de ta demande d&apos;accès (modifiable dans Ma carte). Pour l&apos;email, regarde dans tes spams ou « Promotions ». L&apos;email vient de <b>lacommerciale.lyon@gmail.com</b> : ajoute cette adresse à tes contacts.</p><p style={{ margin: 0 }}>Vérifie aussi que tu utilises l&apos;email de ta demande d&apos;accès.</p></> },
       { q: "Mon lien ne marche plus.", r: <p style={{ margin: 0 }}>Un lien est valable une heure et ne sert qu&apos;une fois. Redemande-en un depuis la page de connexion.</p> },
       { q: "Je reçois des messages WhatsApp du club ?", r: <p style={{ margin: 0 }}>Si tu l&apos;as accepté : nouvelles missions, rappels avant échéance, preuves validées ou à refaire. Tu peux activer, désactiver ou changer ton numéro à tout moment dans Ma carte.</p> },
       { q: "Je peux mettre ma carte dans Apple Wallet ou Google Wallet ?", r: <p style={{ margin: 0 }}>Oui, depuis Ma carte, bouton « Ajouter à Apple Wallet » sur iPhone ou « Ajouter à Google Wallet » sur Android. Ton solde de points s&apos;y met à jour tout seul, avec une notification à chaque changement.</p> },
@@ -56,7 +56,7 @@ const BLOCS: { titre: string; questions: { q: string; r: React.ReactNode }[] }[]
     questions: [
       { q: "Qui voit mes informations ?", r: <p style={{ margin: 0 }}>Seule l&apos;équipe de La Commerciale, et ton chef d&apos;équipe pour ce qui concerne ta team. Les autres membres ne voient que ton prénom et l&apos;initiale de ton nom dans le classement.</p> },
       { q: "Que deviennent mes captures ?", r: <p style={{ margin: 0 }}>Elles servent uniquement à valider tes missions, et sont supprimées automatiquement 5 jours après la soirée. Tes points, eux, restent.</p> },
-      { q: "Comment quitter le club ?", r: <p style={{ margin: 0 }}>Écris à <a href="mailto:xoxo@lacom.club">xoxo@lacom.club</a> : ton compte et tes données seront supprimés. Détails dans la <Link href="/ambassadeurs/confidentialite">politique de confidentialité</Link>.</p> },
+      { q: "Comment quitter le club ?", r: <p style={{ margin: 0 }}>Écris à <a href="mailto:lacommerciale.lyon@gmail.com">lacommerciale.lyon@gmail.com</a> : ton compte et tes données seront supprimés. Détails dans la <Link href="/ambassadeurs/confidentialite">politique de confidentialité</Link>.</p> },
     ],
   },
 ];

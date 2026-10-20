@@ -10,7 +10,7 @@ export default function Confidentialite() {
       <Bloc titre="Qui est responsable ?">
         <p style={p0}>
           MBC EVENTS (SASU, RCS Lyon 851 503 961), 33 avenue Jean Jaurès, 69370 Saint-Didier-au-Mont-d&apos;Or, qui exploite La Commerciale et le XOXO Club.
-          Pour toute question ou demande : <a href="mailto:xoxo@lacom.club">xoxo@lacom.club</a>.
+          Pour toute question ou demande : <a href="mailto:lacommerciale.lyon@gmail.com">lacommerciale.lyon@gmail.com</a>.
         </p>
       </Bloc>
 
@@ -62,7 +62,7 @@ export default function Confidentialite() {
       <Bloc titre="Tes droits">
         <p style={p0}>
           Tu peux accéder à tes données, les corriger, les faire supprimer, t&apos;opposer à leur traitement, en limiter l&apos;usage et en demander une copie
-          (portabilité). Écris à <a href="mailto:xoxo@lacom.club">xoxo@lacom.club</a> : on te répond sous un mois. Tu peux aussi saisir la CNIL (cnil.fr).
+          (portabilité). Écris à <a href="mailto:lacommerciale.lyon@gmail.com">lacommerciale.lyon@gmail.com</a> : on te répond sous un mois. Tu peux aussi saisir la CNIL (cnil.fr).
         </p>
       </Bloc>
 

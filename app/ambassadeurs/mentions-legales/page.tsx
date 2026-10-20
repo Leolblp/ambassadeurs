@@ -13,7 +13,7 @@ export default function MentionsLegales() {
         <p style={p0}>
           Siège social : 33 avenue Jean Jaurès, 69370 Saint-Didier-au-Mont-d&apos;Or, France<br />
           SIRET : 851 503 961 00019 · TVA intracommunautaire : FR17851503961<br />
-          Contact : <a href="mailto:xoxo@lacom.club">xoxo@lacom.club</a>
+          Contact : <a href="mailto:lacommerciale.lyon@gmail.com">lacommerciale.lyon@gmail.com</a>
         </p>
         <p style={p0}>Directeur de la publication : Aaron Ajzenberg, Président.</p>
       </Bloc>
