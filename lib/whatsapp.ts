@@ -8,7 +8,8 @@ export type Modele =
   | "xoxo_preuve_refusee"
   | "xoxo_nouvelle_mission"
   | "xoxo_rappel_mission"
-  | "xoxo_preuves_team";
+  | "xoxo_preuves_team"
+  | "xoxo_code";
 
 /** 06 12 34 56 78 / +33 6… / 0033 6… -> 33612345678 (format attendu par l'API). */
 export function telInternational(tel: string | null | undefined): string | null {
@@ -29,7 +30,7 @@ export function jourMois(iso: string) {
 type Destinataire = { id: string; phone: string | null; whatsapp_optin: boolean };
 
 /** Envoie un modèle WhatsApp. Ne lève jamais d'erreur : tout est journalisé dans whatsapp_log. */
-export async function envoyerWhatsApp(dest: Destinataire, modele: Modele, variables: (string | number)[]) {
+export async function envoyerWhatsApp(dest: Destinataire, modele: Modele, variables: (string | number)[], options: { bouton?: string } = {}) {
   const token = process.env.WHATSAPP_TOKEN;
   const idNumero = process.env.WHATSAPP_PHONE_NUMBER_ID;
   const tel = telInternational(dest.phone);
@@ -48,7 +49,10 @@ export async function envoyerWhatsApp(dest: Destinataire, modele: Modele, variab
         template: {
           name: modele,
           language: { code: "fr" },
-          components: [{ type: "body", parameters: variables.map((v) => ({ type: "text", text: String(v).slice(0, 500) || "-" })) }],
+          components: [
+            { type: "body", parameters: variables.map((v) => ({ type: "text", text: String(v).slice(0, 500) || "-" })) },
+            ...(options.bouton ? [{ type: "button", sub_type: "url", index: "0", parameters: [{ type: "text", text: options.bouton }] }] : []),
+          ],
         },
       }),
     });
@@ -65,7 +69,7 @@ export async function envoyerWhatsApp(dest: Destinataire, modele: Modele, variab
 
 /** Définition des modèles soumis à Meta (catégorie Utilitaire, français). */
 export const MODELES_META: { name: Modele; texte: string; exemple: string[] }[] = [
-  { name: "xoxo_acces_accepte", texte: "Bonjour {{1}}, ta demande d'accès au XOXO Club est acceptée. Active ton accès depuis l'email reçu de xoxo@lacom.club. Bienvenue au club.", exemple: ["Léa"] },
+  { name: "xoxo_acces_accepte", texte: "Bonjour {{1}}, ta demande d'accès au XOXO Club est acceptée. Touche le bouton ci-dessous pour activer ton accès. Bienvenue au club.", exemple: ["Léa"] },
   { name: "xoxo_preuve_validee", texte: "Bonjour {{1}}, ta preuve pour la mission « {{2}} » est validée : {{3}} points crédités. Retrouve ton solde dans ton espace membre.", exemple: ["Léa", "Partage le lien de la soirée en story", "150"] },
   { name: "xoxo_preuve_refusee", texte: "Bonjour {{1}}, ta preuve pour la mission « {{2}} » est à refaire. Motif : {{3}}. Tu peux en renvoyer une tant que la mission est ouverte.", exemple: ["Léa", "Partage le lien de la soirée en story", "story publiée en amis proches"] },
   { name: "xoxo_nouvelle_mission", texte: "Bonjour {{1}}, une nouvelle mission est disponible : « {{2}} », {{3}} points à gagner avant le {{4}}. Retrouve-la dans ton espace membre.", exemple: ["Léa", "Crée ta story avant la soirée", "150", "samedi 25 octobre"] },

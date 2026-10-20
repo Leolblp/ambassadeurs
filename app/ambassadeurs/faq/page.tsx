@@ -9,7 +9,7 @@ const BLOCS: { titre: string; questions: { q: string; r: React.ReactNode }[] }[]
     titre: "Le club",
     questions: [
       { q: "C'est quoi, le XOXO Club ?", r: <p style={{ margin: 0 }}>Le cercle privé de La Commerciale. Ses membres font vivre les soirées (stories, relais, invitations) et gagnent des points qu&apos;ils échangent contre des privilèges réservés au club.</p> },
-      { q: "Comment rejoindre le club ?", r: <p style={{ margin: 0 }}>Envoie une <Link href="/ambassadeurs/rejoindre">demande d&apos;accès</Link>. Chaque demande est étudiée personnellement. Si elle est retenue, tu reçois une invitation par email sous 72 h environ.</p> },
+      { q: "Comment rejoindre le club ?", r: <p style={{ margin: 0 }}>Envoie une <Link href="/ambassadeurs/rejoindre">demande d&apos;accès</Link>. Chaque demande est étudiée personnellement. Si elle est retenue, tu reçois ton accès sur WhatsApp (ou par email) sous 72 h environ.</p> },
       { q: "Pourquoi ma demande n'a pas été acceptée ?", r: <p style={{ margin: 0 }}>Les places sont limitées et l&apos;équipe garde le club restreint. Tu pourras retenter ta chance plus tard, ou entrer par la recommandation d&apos;un chef d&apos;équipe.</p> },
       { q: "C'est payant ?", r: <p style={{ margin: 0 }}>Non. L&apos;accès au club est gratuit. On n&apos;y gagne pas d&apos;argent, on y gagne des privilèges.</p> },
     ],
@@ -17,8 +17,8 @@ const BLOCS: { titre: string; questions: { q: string; r: React.ReactNode }[] }[]
   {
     titre: "Mon accès",
     questions: [
-      { q: "Comment je me connecte ?", r: <p style={{ margin: 0 }}>Sur <Link href="/ambassadeurs/connexion">lacom.club/ambassadeurs/connexion</Link>, entre ton email : tu reçois un lien de connexion. Pas de mot de passe à retenir.</p> },
-      { q: "Je ne reçois pas l'email de connexion.", r: <><p style={{ margin: 0 }}>Regarde dans tes spams ou « Promotions ». L&apos;email vient de <b>xoxo@lacom.club</b> : ajoute cette adresse à tes contacts.</p><p style={{ margin: 0 }}>Vérifie aussi que tu utilises l&apos;email de ta demande d&apos;accès.</p></> },
+      { q: "Comment je me connecte ?", r: <p style={{ margin: 0 }}>Sur <Link href="/ambassadeurs/connexion">lacom.club/ambassadeurs/connexion</Link>, entre ton numéro : tu reçois un code à 6 chiffres sur WhatsApp. Pas de mot de passe à retenir. Tu peux aussi demander un lien par email.</p> },
+      { q: "Je ne reçois pas mon code ou mon email de connexion.", r: <><p style={{ margin: 0 }}>Pour WhatsApp, vérifie que tu utilises le numéro donné lors de ta demande d&apos;accès (modifiable dans Ma carte). Pour l&apos;email, regarde dans tes spams ou « Promotions ». L&apos;email vient de <b>xoxo@lacom.club</b> : ajoute cette adresse à tes contacts.</p><p style={{ margin: 0 }}>Vérifie aussi que tu utilises l&apos;email de ta demande d&apos;accès.</p></> },
       { q: "Mon lien ne marche plus.", r: <p style={{ margin: 0 }}>Un lien est valable une heure et ne sert qu&apos;une fois. Redemande-en un depuis la page de connexion.</p> },
       { q: "Je reçois des messages WhatsApp du club ?", r: <p style={{ margin: 0 }}>Si tu l&apos;as accepté : nouvelles missions, rappels avant échéance, preuves validées ou à refaire. Tu peux activer, désactiver ou changer ton numéro à tout moment dans Ma carte.</p> },
       { q: "Je peux mettre ma carte dans Apple Wallet ou Google Wallet ?", r: <p style={{ margin: 0 }}>Oui, depuis Ma carte, bouton « Ajouter à Apple Wallet » sur iPhone ou « Ajouter à Google Wallet » sur Android. Ton solde de points s&apos;y met à jour tout seul, avec une notification à chaque changement.</p> },

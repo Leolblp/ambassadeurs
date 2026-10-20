@@ -55,7 +55,7 @@ function Formulaire() {
         <div style={{ flexGrow: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 14, textAlign: "center" }}>
           <p className="label" style={{ margin: 0 }}>Demande reçue</p>
           <h1 className="serif" style={{ margin: 0, fontSize: 40, lineHeight: 1.05 }}>Merci. On revient vers toi.</h1>
-          <p style={{ margin: 0, color: "var(--gris)", lineHeight: 1.55 }}>Chaque demande est étudiée personnellement. Si ta candidature est retenue, tu recevras ton accès par email sous 72 h.</p>
+          <p style={{ margin: 0, color: "var(--gris)", lineHeight: 1.55 }}>Chaque demande est étudiée personnellement. Si ta candidature est retenue, tu recevras ton accès sur WhatsApp (ou par email) sous 72 h.</p>
         </div>
       ) : (
         <>

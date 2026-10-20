@@ -5,7 +5,7 @@ import { headers } from "next/headers";
 import { requireAdmin, requireStaff, codeDepuisPrenom, codeEquipe } from "@/lib/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { after } from "next/server";
-import { envoyerWhatsApp, jourMois, MODELES_META, soumettreModele, statutsModeles } from "@/lib/whatsapp";
+import { envoyerWhatsApp, jourMois, MODELES_META, soumettreModele, statutsModeles, telInternational } from "@/lib/whatsapp";
 
 export type Resultat = { ok: boolean; message: string } | null;
 
@@ -68,13 +68,16 @@ export async function accepterDemande(id: string): Promise<Resultat> {
     return { ok: false, message: "Clé secrète Supabase absente sur Vercel (SUPABASE_SECRET_KEY)." };
   }
 
-  // 1. Création du compte + email d'invitation (le profil est créé automatiquement)
+  // 1. Création du compte (le profil est créé automatiquement).
+  //    Avec WhatsApp : compte créé sans email, le lien d'activation part sur WhatsApp.
+  //    Sans WhatsApp : invitation classique par email.
   const h = await headers();
   const origine = h.get("host") ? `https://${h.get("host")}` : process.env.NEXT_PUBLIC_SITE_URL;
-  const { data: cree, error: errCreation } = await admin.auth.admin.inviteUserByEmail(d.email, {
-    data: { first_name: d.first_name, last_name: d.last_name, phone: d.phone, instagram: d.instagram },
-    redirectTo: `${origine}/ambassadeurs/auth/bienvenue`,
-  });
+  const metadata = { first_name: d.first_name, last_name: d.last_name, phone: d.phone, instagram: d.instagram };
+  const parWhatsApp = !!(d.whatsapp_optin && telInternational(d.phone) && process.env.WHATSAPP_TOKEN);
+  const { data: cree, error: errCreation } = parWhatsApp
+    ? await admin.auth.admin.createUser({ email: d.email, email_confirm: true, user_metadata: metadata })
+    : await admin.auth.admin.inviteUserByEmail(d.email, { data: metadata, redirectTo: `${origine}/ambassadeurs/auth/bienvenue` });
   if (errCreation || !cree.user) {
     return { ok: false, message: errCreation?.message.toLowerCase().includes("already") ? "Cet email a déjà un compte." : "Création du compte impossible : " + errCreation?.message };
   }
@@ -88,15 +91,22 @@ export async function accepterDemande(id: string): Promise<Resultat> {
     code = base.replace("-XOXO", `${i}-XOXO`);
   }
   await admin.from("profiles").update({ promo_code: code, team_id: d.team_id ?? null, whatsapp_optin: !!d.whatsapp_optin }).eq("id", cree.user.id);
-  const nouveau = { id: cree.user.id, phone: d.phone, whatsapp_optin: !!d.whatsapp_optin };
-  after(() => envoyerWhatsApp(nouveau, "xoxo_acces_accepte", [d.first_name || "toi"]));
+  let canal = "par email";
+  if (parWhatsApp) {
+    const { data: lien } = await admin.auth.admin.generateLink({ type: "magiclink", email: d.email });
+    const envoye = lien?.properties?.hashed_token
+      ? await envoyerWhatsApp({ id: cree.user.id, phone: d.phone, whatsapp_optin: true }, "xoxo_acces_accepte", [d.first_name || "toi"], { bouton: lien.properties.hashed_token })
+      : false;
+    if (envoye) canal = "sur WhatsApp";
+    else await admin.auth.signInWithOtp({ email: d.email, options: { shouldCreateUser: false, emailRedirectTo: `${origine}/ambassadeurs/auth/callback` } });
+  }
 
   // 3. Demande marquée acceptée
   await supabase.from("access_requests").update({ status: "accepted", reviewed_by: user.id, reviewed_at: new Date().toISOString() }).eq("id", id);
 
   revalidatePath("/ambassadeurs/admin/demandes");
   revalidatePath("/ambassadeurs/equipe");
-  return { ok: true, message: `Bienvenue à ${d.first_name} : code ${code}, invitation envoyée par email.` };
+  return { ok: true, message: `Bienvenue à ${d.first_name} : code ${code}, invitation envoyée ${canal}.` };
 }
 
 export async function refuserDemande(id: string): Promise<Resultat> {
