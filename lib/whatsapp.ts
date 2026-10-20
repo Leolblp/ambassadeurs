@@ -62,3 +62,44 @@ export async function envoyerWhatsApp(dest: Destinataire, modele: Modele, variab
   } catch {}
   return ok;
 }
+
+/** Définition des modèles soumis à Meta (catégorie Utilitaire, français). */
+export const MODELES_META: { name: Modele; texte: string; exemple: string[] }[] = [
+  { name: "xoxo_acces_accepte", texte: "Bonjour {{1}}, ta demande d'accès au XOXO Club est acceptée. Active ton accès depuis l'email reçu de xoxo@lacom.club. Bienvenue au club.", exemple: ["Léa"] },
+  { name: "xoxo_preuve_validee", texte: "Bonjour {{1}}, ta preuve pour la mission « {{2}} » est validée : {{3}} points crédités. Retrouve ton solde dans ton espace membre.", exemple: ["Léa", "Partage le lien de la soirée en story", "150"] },
+  { name: "xoxo_preuve_refusee", texte: "Bonjour {{1}}, ta preuve pour la mission « {{2}} » est à refaire. Motif : {{3}}. Tu peux en renvoyer une tant que la mission est ouverte.", exemple: ["Léa", "Partage le lien de la soirée en story", "story publiée en amis proches"] },
+  { name: "xoxo_nouvelle_mission", texte: "Bonjour {{1}}, une nouvelle mission est disponible : « {{2}} », {{3}} points à gagner avant le {{4}}. Retrouve-la dans ton espace membre.", exemple: ["Léa", "Crée ta story avant la soirée", "150", "samedi 25 octobre"] },
+  { name: "xoxo_rappel_mission", texte: "Bonjour {{1}}, il te reste jusqu'au {{2}} pour réaliser la mission « {{3}} ». Retrouve-la dans ton espace membre.", exemple: ["Léa", "samedi 25 octobre", "Crée ta story avant la soirée"] },
+  { name: "xoxo_preuves_team", texte: "Bonjour {{1}}, {{2}} preuves de ta team attendent ta validation. Retrouve-les dans l'onglet Ma team.", exemple: ["Léa", "3"] },
+];
+
+const GRAPH = "https://graph.facebook.com/v23.0";
+
+export type StatutModele = { name: string; status: string; category: string; rejected_reason?: string };
+
+export async function statutsModeles(): Promise<{ ok: true; liste: StatutModele[] } | { ok: false; erreur: string }> {
+  const token = process.env.WHATSAPP_TOKEN, waba = process.env.WHATSAPP_WABA_ID;
+  if (!token || !waba) return { ok: false, erreur: "WHATSAPP_TOKEN ou WHATSAPP_WABA_ID absent sur Vercel (pense au Redeploy)." };
+  const r = await fetch(`${GRAPH}/${waba}/message_templates?fields=name,status,category,rejected_reason&limit=200`, { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" });
+  const j = await r.json();
+  if (!r.ok) return { ok: false, erreur: j?.error?.message ?? "Erreur Meta" };
+  return { ok: true, liste: (j.data ?? []).filter((t: StatutModele) => t.name.startsWith("xoxo_")) };
+}
+
+export async function soumettreModele(m: (typeof MODELES_META)[number]) {
+  const r = await fetch(`${GRAPH}/${process.env.WHATSAPP_WABA_ID}/message_templates`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${process.env.WHATSAPP_TOKEN}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name: m.name,
+      language: "fr",
+      category: "UTILITY",
+      components: [
+        { type: "BODY", text: m.texte, example: { body_text: [m.exemple] } },
+        { type: "BUTTONS", buttons: [{ type: "URL", text: "Ouvrir mon espace", url: "https://lacom.club/ambassadeurs" }] },
+      ],
+    }),
+  });
+  const j = await r.json();
+  return r.ok ? null : (j?.error?.error_user_msg || j?.error?.message || "Erreur Meta");
+}

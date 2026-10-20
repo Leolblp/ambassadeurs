@@ -5,7 +5,7 @@ import { headers } from "next/headers";
 import { requireAdmin, requireStaff, codeDepuisPrenom, codeEquipe } from "@/lib/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { after } from "next/server";
-import { envoyerWhatsApp, jourMois } from "@/lib/whatsapp";
+import { envoyerWhatsApp, jourMois, MODELES_META, soumettreModele, statutsModeles } from "@/lib/whatsapp";
 
 export type Resultat = { ok: boolean; message: string } | null;
 
@@ -287,4 +287,31 @@ export async function affecterEquipe(_: Resultat, f: FormData): Promise<Resultat
   revalidatePath("/ambassadeurs/admin/membres");
   revalidatePath("/ambassadeurs/admin/equipes");
   return error ? { ok: false, message: error.message } : { ok: true, message: equipe ? "Membre affecté." : "Membre retiré de son équipe." };
+}
+
+/* ---------- WhatsApp ---------- */
+
+export async function soumettreModeles(): Promise<Resultat> {
+  await requireAdmin();
+  const statuts = await statutsModeles();
+  if (!statuts.ok) return { ok: false, message: statuts.erreur };
+  const existants = new Set(statuts.liste.map((t) => t.name));
+  const aSoumettre = MODELES_META.filter((m) => !existants.has(m.name));
+  if (!aSoumettre.length) return { ok: true, message: "Tous les modèles sont déjà soumis." };
+  const erreurs: string[] = [];
+  for (const m of aSoumettre) {
+    const e = await soumettreModele(m);
+    if (e) erreurs.push(`${m.name} : ${e}`);
+  }
+  revalidatePath("/ambassadeurs/admin/whatsapp");
+  return erreurs.length ? { ok: false, message: erreurs.join(" · ") } : { ok: true, message: `${aSoumettre.length} modèle(s) soumis à Meta.` };
+}
+
+export async function envoyerTest(): Promise<Resultat> {
+  const { supabase, user } = await requireAdmin();
+  const { data: p } = await supabase.from("profiles").select("id, first_name, phone").eq("id", user.id).single();
+  if (!p?.phone) return { ok: false, message: "Ajoute ton numéro dans Ma carte d'abord." };
+  const ok = await envoyerWhatsApp({ ...p, whatsapp_optin: true }, "xoxo_preuve_validee", [p.first_name || "toi", "Message de test", 0]);
+  revalidatePath("/ambassadeurs/admin/whatsapp");
+  return ok ? { ok: true, message: "Message de test envoyé sur ton WhatsApp." } : { ok: false, message: "Échec de l'envoi, voir le journal ci-dessous." };
 }
