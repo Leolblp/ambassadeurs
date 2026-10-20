@@ -45,14 +45,15 @@ export default async function GuideAdmin() {
         <Tableau
           entetes={["Quand", "Quoi", "Où"]}
           lignes={[
-            ["Lundi", "Créer la soirée de la semaine et 3 ou 4 missions", <Link key="m" href="/ambassadeurs/admin/missions">Missions</Link>],
-            ["Lundi", "Annoncer les missions sur WhatsApp (bouton « Message WhatsApp »)", <Link key="m2" href="/ambassadeurs/admin/missions">Missions</Link>],
+            ["Dimanche", "Lancement de la semaine : créer la soirée et 3 ou 4 missions", <Link key="m" href="/ambassadeurs/admin/missions">Missions</Link>],
+            ["Dimanche", "Annoncer les missions sur WhatsApp (bouton « Message WhatsApp »)", <Link key="m2" href="/ambassadeurs/admin/missions">Missions</Link>],
             ["Chaque jour", "Valider les preuves en attente (le chiffre rouge dans le menu)", <Link key="p" href="/ambassadeurs/admin">Preuves</Link>],
             ["Chaque jour", "Traiter les demandes d'accès", <Link key="d" href="/ambassadeurs/admin/demandes">Demandes</Link>],
             ["Le soir de la soirée", "Remettre les privilèges débloqués", <Link key="r" href="/ambassadeurs/admin/privileges">Privilèges</Link>],
             ["Après la soirée", "Archiver les missions terminées", <Link key="a" href="/ambassadeurs/admin/missions">Missions</Link>],
           ]}
         />
+        <Encart titre="La semaine du club">La semaine de communication commence le <b>dimanche</b> : les missions de la semaine doivent être en ligne et annoncées avant dimanche soir.</Encart>
         <Encart titre="Règle d'or">Une preuve doit être validée <b>sous 48 h</b>. Un membre qui attend ses points se démotive.</Encart>
       </Section>
 

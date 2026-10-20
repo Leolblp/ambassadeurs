@@ -85,7 +85,7 @@ export default async function GuideChef() {
 
       <Section id="animer" numero={6} titre="Animer ta team">
         <Liste items={[
-          <>Crée un groupe WhatsApp de ta team et relaie chaque nouvelle mission.</>,
+          <>Crée un groupe WhatsApp de ta team et relaie les nouvelles missions dès le <b>dimanche</b>, jour de lancement de la semaine du club.</>,
           <>Félicite publiquement le meilleur de la semaine.</>,
           <>Relance gentiment ceux qui ont des missions « À faire ».</>,
           <>Le soir de la soirée, retrouve ta team sur place : c&apos;est là que le club prend vie.</>,
