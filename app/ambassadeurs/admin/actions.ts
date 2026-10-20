@@ -155,7 +155,7 @@ export async function annoncerMission(id: string): Promise<Resultat> {
   const liste = membres ?? [];
   after(async () => {
     for (const mb of liste) {
-      await envoyerWhatsApp(mb, "xoxo_nouvelle_mission", [mb.first_name || "toi", m.title, m.points, m.deadline ? jourMois(m.deadline) : "la fin de la semaine"]);
+      await envoyerWhatsApp(mb, "xoxo_mission_ajoutee", [mb.first_name || "toi", m.title, m.deadline ? jourMois(m.deadline) : "fin de semaine"]);
     }
   });
   revalidatePath("/ambassadeurs/admin/missions");

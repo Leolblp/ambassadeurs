@@ -6,7 +6,7 @@ export type Modele =
   | "xoxo_acces_accepte"
   | "xoxo_preuve_validee"
   | "xoxo_preuve_refusee"
-  | "xoxo_nouvelle_mission"
+  | "xoxo_mission_ajoutee"
   | "xoxo_rappel_mission"
   | "xoxo_preuves_team"
   | "xoxo_code";
@@ -72,7 +72,7 @@ export const MODELES_META: { name: Modele; texte: string; exemple: string[] }[] 
   { name: "xoxo_acces_accepte", texte: "Bonjour {{1}}, ta demande d'accès au XOXO Club est acceptée. Touche le bouton ci-dessous pour activer ton accès. Bienvenue au club.", exemple: ["Léa"] },
   { name: "xoxo_preuve_validee", texte: "Bonjour {{1}}, ta preuve pour la mission « {{2}} » est validée : {{3}} points crédités. Retrouve ton solde dans ton espace membre.", exemple: ["Léa", "Partage le lien de la soirée en story", "150"] },
   { name: "xoxo_preuve_refusee", texte: "Bonjour {{1}}, ta preuve pour la mission « {{2}} » est à refaire. Motif : {{3}}. Tu peux en renvoyer une tant que la mission est ouverte.", exemple: ["Léa", "Partage le lien de la soirée en story", "story publiée en amis proches"] },
-  { name: "xoxo_nouvelle_mission", texte: "Bonjour {{1}}, une nouvelle mission est disponible : « {{2}} », {{3}} points à gagner avant le {{4}}. Retrouve-la dans ton espace membre.", exemple: ["Léa", "Crée ta story avant la soirée", "150", "samedi 25 octobre"] },
+  { name: "xoxo_mission_ajoutee", texte: "Bonjour {{1}}, une mission a été ajoutée à ton espace membre XOXO Club : « {{2}} ». Échéance : {{3}}.", exemple: ["Léa", "Crée ta story avant la soirée", "samedi 25 octobre"] },
   { name: "xoxo_rappel_mission", texte: "Bonjour {{1}}, il te reste jusqu'au {{2}} pour réaliser la mission « {{3}} ». Retrouve-la dans ton espace membre.", exemple: ["Léa", "samedi 25 octobre", "Crée ta story avant la soirée"] },
   { name: "xoxo_preuves_team", texte: "Bonjour {{1}}, {{2}} preuves de ta team attendent ta validation. Retrouve-les dans l'onglet Ma team.", exemple: ["Léa", "3"] },
 ];
