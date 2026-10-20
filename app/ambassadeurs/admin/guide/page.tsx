@@ -103,6 +103,7 @@ export default async function GuideAdmin() {
           <><b>Valider</b> : les points sont crédités immédiatement. Si le membre a une team, son chef reçoit aussi son bonus.</>,
           <><b>Refuser</b> : écris un motif clair (« la story doit montrer l&apos;affiche en entier »). Le membre le voit et peut renvoyer une preuve.</>,
         ]} />
+        <Encart titre="Suppression automatique" ton="astuce">Les fichiers de preuve (captures, photos, vidéos) sont supprimés automatiquement <b>5 jours après la soirée</b> liée à la mission (ou 5 jours après la validation s&apos;il n&apos;y a pas de soirée). Les preuves en attente ne sont jamais supprimées. Les points et l&apos;historique restent.</Encart>
         <Encart titre="Ce qu'on vérifie" ton="attention">La preuve correspond bien à la mission, elle est récente, elle vient du compte du membre, et la publication est visible (pas en « amis proches »).</Encart>
       </Section>
 

@@ -53,6 +53,7 @@ const BLOCS: { titre: string; questions: { q: string; r: React.ReactNode }[] }[]
     titre: "Mes données",
     questions: [
       { q: "Qui voit mes informations ?", r: <p style={{ margin: 0 }}>Seule l&apos;équipe de La Commerciale, et ton chef d&apos;équipe pour ce qui concerne ta team. Les autres membres ne voient que ton prénom et l&apos;initiale de ton nom dans le classement.</p> },
+      { q: "Que deviennent mes captures et vidéos ?", r: <p style={{ margin: 0 }}>Elles servent uniquement à valider tes missions, et sont supprimées automatiquement 5 jours après la soirée. Tes points, eux, restent.</p> },
       { q: "Comment quitter le club ?", r: <p style={{ margin: 0 }}>Écris à l&apos;équipe de La Commerciale : ton compte et tes données seront supprimés.</p> },
     ],
   },
