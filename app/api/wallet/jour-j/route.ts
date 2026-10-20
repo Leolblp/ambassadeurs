@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { bundle, heureLyon, jourLyon, pousserToutesLesCartes } from "@/lib/wallet";
+import { jourJGoogle } from "@/lib/wallet/google";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -24,5 +25,6 @@ export async function POST(request: NextRequest) {
     .gte("starts_at", maintenant.toISOString()).lte("starts_at", new Date(maintenant.getTime() + 18 * 3600 * 1000).toISOString());
   const soiree = (soirees ?? []).find((s) => jourLyon(new Date(s.starts_at)) === jourLyon(maintenant));
   if (!soiree) return NextResponse.json({ soiree: null });
-  return NextResponse.json({ soiree: soiree.name, envoyes: await pousserToutesLesCartes() });
+  const [apple, google] = await Promise.all([pousserToutesLesCartes().catch(() => 0), jourJGoogle().catch(() => 0)]);
+  return NextResponse.json({ soiree: soiree.name, apple, google });
 }

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { headers } from "next/headers";
 import { getMembre, numero, pts, RAISON } from "@/lib/membre";
 import Copier from "../../_components/Copier";
 import Deconnexion from "./Deconnexion";
@@ -13,6 +14,9 @@ export default async function Carte() {
     .order("created_at", { ascending: false })
     .limit(20);
 
+  const ua = (await headers()).get("user-agent") ?? "";
+  const iphone = /iPhone|iPad|iPod/i.test(ua);
+  const android = /Android/i.test(ua);
   const depuis = new Date(profil.created_at).toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
   const nom = [profil.first_name, profil.last_name].filter(Boolean).join(" ") || "Membre";
 
@@ -40,10 +44,20 @@ export default async function Carte() {
         </div>
       </div>
 
-      <a href="/api/wallet/pass" style={{ alignSelf: "center", display: "inline-flex", alignItems: "center", gap: 10, minHeight: 48, padding: "0 22px", borderRadius: 12, background: "#000", color: "#fff", border: "1px solid #3a3a3a", fontWeight: 700, fontSize: 15, textDecoration: "none" }}>
-        <svg width="22" height="18" viewBox="0 0 22 18" aria-hidden="true"><rect x="1" y="1" width="20" height="16" rx="3" fill="none" stroke="#fff" strokeWidth="1.6" /><path d="M1 6h20M1 10h20" stroke="#ff1a1a" strokeWidth="1.6" /></svg>
-        Ajouter à Apple Wallet
-      </a>
+      <div style={{ alignSelf: "center", display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center" }}>
+        {!android && (
+          <a href="/api/wallet/pass" style={styleWallet}>
+            <svg width="22" height="18" viewBox="0 0 22 18" aria-hidden="true"><rect x="1" y="1" width="20" height="16" rx="3" fill="none" stroke="#fff" strokeWidth="1.6" /><path d="M1 6h20M1 10h20" stroke="#ff1a1a" strokeWidth="1.6" /></svg>
+            Ajouter à Apple Wallet
+          </a>
+        )}
+        {!iphone && (
+          <a href="/api/wallet/google" style={styleWallet}>
+            <svg width="22" height="18" viewBox="0 0 22 18" aria-hidden="true"><rect x="1" y="1" width="20" height="16" rx="3" fill="none" stroke="#fff" strokeWidth="1.6" /><path d="M1 6h20M1 10h20" stroke="#ff1a1a" strokeWidth="1.6" /></svg>
+            Ajouter à Google Wallet
+          </a>
+        )}
+      </div>
 
       {profil.promo_code && (
         <section style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, padding: "14px 16px", border: "1px dashed var(--bord-rouge)", borderRadius: 14 }}>
@@ -87,3 +101,5 @@ export default async function Carte() {
     </div>
   );
 }
+
+const styleWallet: React.CSSProperties = { display: "inline-flex", alignItems: "center", gap: 10, minHeight: 48, padding: "0 22px", borderRadius: 12, background: "#000", color: "#fff", border: "1px solid #3a3a3a", fontWeight: 700, fontSize: 15, textDecoration: "none" };

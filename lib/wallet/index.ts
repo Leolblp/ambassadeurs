@@ -45,7 +45,8 @@ export async function carteDuMembre(memberId: string) {
 const pts = (n: number) => new Intl.NumberFormat("fr-FR").format(n).replace(/ /g, " ");
 
 /** Génère le fichier .pkpass à jour (solde, prochain privilège, team). */
-export async function genererPass(memberId: string): Promise<Buffer> {
+/** Toutes les données affichées sur la carte (Apple et Google). */
+export async function donneesCarte(memberId: string) {
   const admin = createAdminClient();
   const [carte, { data: p }, { data: solde }, { data: privileges }, { data: soiree }] = await Promise.all([
     carteDuMembre(memberId),
@@ -56,19 +57,47 @@ export async function genererPass(memberId: string): Promise<Buffer> {
   ]);
   if (!p) throw new Error("Membre introuvable");
   const points = Number(solde ?? 0);
-  const prochain = (privileges ?? []).find((x) => x.cost > points);
-  const nom = [p.first_name, p.last_name].filter(Boolean).join(" ") || "Membre";
+  const priv = (privileges ?? []).find((x) => x.cost > points);
   const numero = String(p.member_number ?? 0).padStart(3, "0");
-  const team = (p.teams as unknown as { name: string } | null)?.name;
-  const b = bundle();
   const debut = soiree ? new Date(soiree.starts_at) : null;
   const ouverture = debut ? dixSeptHeures(debut) : null;
   const fin = debut ? new Date(debut.getTime() + 8 * 3600 * 1000) : null;
   const ceSoir = !!(ouverture && fin && Date.now() >= ouverture.getTime() && Date.now() < fin.getTime());
-  const champSoiree = soiree
+  return {
+    serial: carte.serial as string,
+    auth_token: carte.auth_token as string,
+    nom: [p.first_name, p.last_name].filter(Boolean).join(" ") || "Membre",
+    numero,
+    code: p.promo_code as string | null,
+    team: (p.teams as unknown as { name: string } | null)?.name ?? null,
+    depuis: p.created_at as string,
+    points,
+    prochain: priv ? { name: priv.name as string, reste: pts(priv.cost - points) } : null,
+    soireeNom: soiree?.name as string | undefined,
+    ouverture,
+    fin,
+    ceSoir,
+    soiree: soiree
+      ? ceSoir
+        ? "Ce soir · La Commerciale"
+        : `${new Date(soiree.starts_at).toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short", timeZone: "Europe/Paris" })} · ${soiree.name}`
+      : null,
+    qr: `XOXO-${numero}-${String(carte.serial).slice(0, 8)}`,
+  };
+}
+
+export async function genererPass(memberId: string): Promise<Buffer> {
+  const d = await donneesCarte(memberId);
+  const carte = { serial: d.serial, auth_token: d.auth_token };
+  const { points, nom, numero, team, ouverture, fin, ceSoir } = d;
+  const p = { promo_code: d.code, created_at: d.depuis };
+  const soiree = d.soireeNom ? { name: d.soireeNom } : null;
+  const prochain = d.prochain;
+  const b = bundle();
+  const champSoiree = d.soiree
     ? ceSoir
-      ? { key: "soiree", value: "Ce soir · La Commerciale", changeMessage: "%@. Ta carte XOXO Club est prête." }
-      : { key: "soiree", value: `${new Date(soiree.starts_at).toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short", timeZone: "Europe/Paris" })} · ${soiree.name}` }
+      ? { key: "soiree", value: d.soiree, changeMessage: "%@. Ta carte XOXO Club est prête." }
+      : { key: "soiree", value: d.soiree }
     : null;
 
   const passJson = {
@@ -98,7 +127,7 @@ export async function genererPass(memberId: string): Promise<Buffer> {
         ...(champSoiree ? [champSoiree] : []),
         ...(team ? [{ key: "team", label: "TEAM", value: team }] : []),
         prochain
-          ? { key: "prochain", label: "PROCHAIN PRIVILÈGE", value: `${prochain.name} · encore ${pts(prochain.cost - points)} pts` }
+          ? { key: "prochain", label: "PROCHAIN PRIVILÈGE", value: `${prochain.name} · encore ${prochain.reste} pts` }
           : { key: "prochain", label: "PRIVILÈGES", value: "Tous accessibles" },
       ],
       backFields: [
@@ -108,7 +137,7 @@ export async function genererPass(memberId: string): Promise<Buffer> {
         { key: "perso", label: "Strictement personnelle", value: "Cette carte est nominative et ne peut pas être partagée." },
       ],
     },
-    barcodes: [{ format: "PKBarcodeFormatQR", message: `XOXO-${numero}-${carte.serial.slice(0, 8)}`, messageEncoding: "iso-8859-1", altText: `N° ${numero}` }],
+    barcodes: [{ format: "PKBarcodeFormatQR", message: d.qr, messageEncoding: "iso-8859-1", altText: `N° ${numero}` }],
   };
 
   const fichiers: Record<string, Buffer> = { "pass.json": Buffer.from(JSON.stringify(passJson)) };
