@@ -51,7 +51,7 @@ export async function donneesCarte(memberId: string) {
   const [carte, { data: p }, { data: solde }, { data: privileges }, { data: soiree }] = await Promise.all([
     carteDuMembre(memberId),
     admin.from("profiles").select("first_name, last_name, member_number, promo_code, created_at, teams!profiles_team_id_fkey(name)").eq("id", memberId).single(),
-    admin.rpc("member_balance", { p_member: memberId }),
+    admin.from("points_ledger").select("delta").eq("member_id", memberId).then((r) => ({ data: (r.data ?? []).reduce((t, l) => t + Number(l.delta), 0) })),
     admin.from("privileges").select("name, cost").eq("is_active", true).order("cost"),
     admin.from("events").select("name, starts_at").gte("starts_at", new Date(Date.now() - 8 * 3600 * 1000).toISOString()).order("starts_at").limit(1).maybeSingle(),
   ]);
