@@ -8,4 +8,5 @@ export const MODELES_MISSIONS = [
   { title: "Ramène ta team pour une date spéciale", description: "Viens à 4 ou plus sur la date annoncée, billets pris avec ton code.", points: 300, proof_type: "tickets", delai_h: 0 },
   { title: "Poste une vidéo en story pendant la soirée", description: "Filme l'ambiance pendant la soirée et poste-la en story, en identifiant La Commerciale. Envoie la capture de ta story.", points: 200, proof_type: "screenshot", delai_h: 12 },
   { title: "Poste une photo de la soirée", description: "Dans les jours qui suivent la soirée, publie une photo de ta soirée en identifiant La Commerciale. Envoie la capture ou le lien.", points: 150, proof_type: "screenshot", delai_h: 72 },
+  { title: "Poste un TikTok", description: "Publie un TikTok sur La Commerciale (avant, pendant ou après la soirée) en identifiant le compte du club. Colle le lien de ta vidéo.", points: 500, proof_type: "link", delai_h: 72 },
 ] as const;
