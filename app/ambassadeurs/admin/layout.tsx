@@ -17,6 +17,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     { href: "/ambassadeurs/admin", label: "Preuves", n: preuves.count ?? 0 },
     { href: "/ambassadeurs/admin/demandes", label: "Demandes d'accès", n: demandes.count ?? 0 },
     { href: "/ambassadeurs/admin/privileges", label: "Privilèges à remettre", n: remises.count ?? 0 },
+    { href: "/ambassadeurs/admin/catalogue", label: "Catalogue des privilèges", n: 0 },
     { href: "/ambassadeurs/admin/missions", label: "Missions", n: 0 },
     { href: "/ambassadeurs/admin/soirees", label: "Soirées", n: 0 },
     { href: "/ambassadeurs/admin/membres", label: "Membres", n: 0 },

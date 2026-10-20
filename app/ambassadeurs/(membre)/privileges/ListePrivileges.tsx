@@ -43,6 +43,7 @@ export default function ListePrivileges({ privileges, solde }: { privileges: Pri
               <div style={{ minWidth: 0 }}>
                 <h2 className="display" style={{ margin: 0, fontSize: 22, lineHeight: 1.1, textTransform: "uppercase", fontWeight: 400 }}>{p.name}</h2>
                 {p.description && <div style={{ fontSize: 12, color: "var(--gris)", marginTop: 4 }}>{p.description}</div>}
+                {p.stock !== null && p.stock > 0 && p.stock <= 5 && <div style={{ fontSize: 11, fontWeight: 700, color: "var(--ambre)", marginTop: 4, letterSpacing: ".04em" }}>Plus que {p.stock} disponible{p.stock > 1 ? "s" : ""}</div>}
               </div>
               <div style={{ flex: "none", textAlign: "right" }}>
                 <div className="display" style={{ fontSize: 20, lineHeight: 1 }}>{p.cost.toLocaleString("fr-FR")}</div>

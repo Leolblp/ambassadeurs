@@ -241,11 +241,14 @@ export async function remettrePrivilege(id: string): Promise<Resultat> {
 
 export async function annulerPrivilege(id: string): Promise<Resultat> {
   const { supabase, user } = await requireAdmin();
-  const { data: r } = await supabase.from("redemptions").select("member_id, cost, status").eq("id", id).single();
+  const { data: r } = await supabase.from("redemptions").select("member_id, cost, status, privilege_id").eq("id", id).single();
   if (!r || r.status !== "requested") return { ok: false, message: "Déjà traité." };
   const { error } = await supabase.from("redemptions").update({ status: "cancelled" }).eq("id", id);
   if (error) return { ok: false, message: error.message };
   await supabase.from("points_ledger").insert({ member_id: r.member_id, delta: r.cost, reason: "adjustment", redemption_id: id, note: "Privilège annulé, points rendus", created_by: user.id });
+  // Remet l'exemplaire en stock si le privilège est limité
+  const { data: priv } = await supabase.from("privileges").select("stock").eq("id", r.privilege_id).single();
+  if (priv && priv.stock !== null) await supabase.from("privileges").update({ stock: priv.stock + 1 }).eq("id", r.privilege_id);
   revalidatePath("/ambassadeurs/admin/privileges");
   return { ok: true, message: "Annulé, points rendus au membre." };
 }
@@ -407,4 +410,58 @@ export async function supprimerMembre(id: string): Promise<Resultat> {
   const { error } = await admin.auth.admin.deleteUser(id);
   revalidatePath("/ambassadeurs/admin/membres");
   return error ? { ok: false, message: "Suppression impossible : " + error.message } : { ok: true, message: `${m.first_name ?? "Le membre"} a été supprimé.` };
+}
+
+/* ---------- Catalogue des privilèges ---------- */
+
+function lirePrivilege(f: FormData) {
+  const nom = txt(f, "name");
+  const cout = parseInt(txt(f, "cost"), 10);
+  const stockTxt = txt(f, "stock");
+  const stock = stockTxt === "" ? null : parseInt(stockTxt, 10);
+  const ordre = parseInt(txt(f, "sort_order") || "0", 10);
+  if (!nom) return { erreur: "Donne un nom au privilège." } as const;
+  if (!Number.isFinite(cout) || cout <= 0) return { erreur: "Indique un coût en points supérieur à 0." } as const;
+  if (stock !== null && (!Number.isFinite(stock) || stock < 0)) return { erreur: "Le stock doit être un nombre positif, ou vide pour illimité." } as const;
+  return { valeurs: { name: nom, description: txt(f, "description") || null, cost: cout, stock, sort_order: Number.isFinite(ordre) ? ordre : 0 } } as const;
+}
+
+function rafraichirPrivileges() {
+  revalidatePath("/ambassadeurs/admin/catalogue");
+  revalidatePath("/ambassadeurs/privileges");
+  revalidatePath("/ambassadeurs");
+}
+
+export async function creerPrivilege(_: Resultat, f: FormData): Promise<Resultat> {
+  const { supabase } = await requireAdmin();
+  const l = lirePrivilege(f);
+  if ("erreur" in l) return { ok: false, message: l.erreur as string };
+  const { error } = await supabase.from("privileges").insert({ ...l.valeurs, is_active: true });
+  rafraichirPrivileges();
+  return error ? { ok: false, message: error.message } : { ok: true, message: `« ${l.valeurs.name} » ajouté au catalogue.` };
+}
+
+export async function modifierPrivilege(id: string, _: Resultat, f: FormData): Promise<Resultat> {
+  const { supabase } = await requireAdmin();
+  const l = lirePrivilege(f);
+  if ("erreur" in l) return { ok: false, message: l.erreur as string };
+  const { error } = await supabase.from("privileges").update(l.valeurs).eq("id", id);
+  rafraichirPrivileges();
+  return error ? { ok: false, message: error.message } : { ok: true, message: "Enregistré." };
+}
+
+export async function basculerPrivilege(id: string, actif: boolean): Promise<Resultat> {
+  const { supabase } = await requireAdmin();
+  const { error } = await supabase.from("privileges").update({ is_active: actif }).eq("id", id);
+  rafraichirPrivileges();
+  return error ? { ok: false, message: error.message } : { ok: true, message: actif ? "Visible par les membres." : "Masqué pour les membres." };
+}
+
+export async function supprimerPrivilege(id: string): Promise<Resultat> {
+  const { supabase } = await requireAdmin();
+  const { count } = await supabase.from("redemptions").select("id", { count: "exact", head: true }).eq("privilege_id", id);
+  if (count) return { ok: false, message: "Déjà débloqué par des membres : masque-le plutôt que de le supprimer." };
+  const { error } = await supabase.from("privileges").delete().eq("id", id);
+  rafraichirPrivileges();
+  return error ? { ok: false, message: error.message } : { ok: true, message: "Supprimé." };
 }
