@@ -315,3 +315,29 @@ export async function envoyerTest(): Promise<Resultat> {
   revalidatePath("/ambassadeurs/admin/whatsapp");
   return ok ? { ok: true, message: "Message de test envoyé sur ton WhatsApp." } : { ok: false, message: "Échec de l'envoi, voir le journal ci-dessous." };
 }
+
+/* ---------- Notifications Wallet ---------- */
+
+export async function envoyerAnnonce(_: Resultat, f: FormData): Promise<Resultat> {
+  const { user } = await requireAdmin();
+  const texte = txt(f, "texte");
+  const team = txt(f, "team_id") || null;
+  if (!texte) return { ok: false, message: "Écris un message." };
+  if (texte.length > 140) return { ok: false, message: "140 caractères maximum." };
+  const admin = createAdminClient();
+  let membres: string[] | undefined;
+  if (team) {
+    const { data } = await admin.from("profiles").select("id").eq("team_id", team).eq("status", "active");
+    membres = (data ?? []).map((m) => m.id);
+  }
+  const { data: annonce, error } = await admin.from("wallet_annonces").insert({ texte, team_id: team, created_by: user.id }).select("id").single();
+  if (error || !annonce) return { ok: false, message: "Envoi impossible : " + error?.message };
+  after(async () => {
+    const { pousserToutesLesCartes } = await import("@/lib/wallet");
+    const { annonceGoogle } = await import("@/lib/wallet/google");
+    const [apple, google] = await Promise.all([pousserToutesLesCartes(membres).catch(() => 0), annonceGoogle(texte, membres).catch(() => 0)]);
+    await admin.from("wallet_annonces").update({ envoyes: apple + google }).eq("id", annonce.id);
+  });
+  revalidatePath("/ambassadeurs/admin/notifications");
+  return { ok: true, message: "Message en cours d'envoi sur les cartes Wallet." };
+}

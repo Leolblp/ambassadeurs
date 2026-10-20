@@ -139,3 +139,19 @@ export async function jourJGoogle() {
   }
   return n;
 }
+
+/** Message du club : mise à jour + notification sur les cartes Google ciblées. */
+export async function annonceGoogle(texte: string, membres?: string[]) {
+  if (!googleConfigure()) return 0;
+  let q = createAdminClient().from("wallet_passes").select("member_id, serial").eq("google", true);
+  if (membres) q = q.in("member_id", membres.length ? membres : ["00000000-0000-0000-0000-000000000000"]);
+  const { data } = await q;
+  let n = 0;
+  for (const c of data ?? []) {
+    const r = await api("POST", `/loyaltyObject/${idObjet(c.serial)}/addMessage`, {
+      message: { id: `annonce-${Date.now()}-${n}`, header: "XOXO Club", body: texte, messageType: "TEXT_AND_NOTIFY" },
+    });
+    if (r.statut < 300) n++;
+  }
+  return n;
+}

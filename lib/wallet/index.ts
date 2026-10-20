@@ -50,12 +50,16 @@ export async function donneesCarte(memberId: string) {
   const admin = createAdminClient();
   const [carte, { data: p }, { data: solde }, { data: privileges }, { data: soiree }] = await Promise.all([
     carteDuMembre(memberId),
-    admin.from("profiles").select("first_name, last_name, member_number, promo_code, created_at, teams!profiles_team_id_fkey(name)").eq("id", memberId).single(),
+    admin.from("profiles").select("first_name, last_name, member_number, promo_code, created_at, team_id, teams!profiles_team_id_fkey(name)").eq("id", memberId).single(),
     admin.from("points_ledger").select("delta").eq("member_id", memberId).then((r) => ({ data: (r.data ?? []).reduce((t, l) => t + Number(l.delta), 0) })),
     admin.from("privileges").select("name, cost").eq("is_active", true).order("cost"),
     admin.from("events").select("name, starts_at").gte("starts_at", new Date(Date.now() - 8 * 3600 * 1000).toISOString()).order("starts_at").limit(1).maybeSingle(),
   ]);
   if (!p) throw new Error("Membre introuvable");
+  const { data: annonce } = await admin.from("wallet_annonces").select("id, texte")
+    .or(p.team_id ? `team_id.is.null,team_id.eq.${p.team_id}` : "team_id.is.null")
+    .gte("created_at", new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString())
+    .order("created_at", { ascending: false }).limit(1).maybeSingle();
   const points = Number(solde ?? 0);
   const priv = (privileges ?? []).find((x) => x.cost > points);
   const numero = String(p.member_number ?? 0).padStart(3, "0");
@@ -82,6 +86,7 @@ export async function donneesCarte(memberId: string) {
         ? "Ce soir · La Commerciale"
         : `${new Date(soiree.starts_at).toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short", timeZone: "Europe/Paris" })} · ${soiree.name}`
       : null,
+    annonce: annonce ? { id: annonce.id as number, texte: annonce.texte as string } : null,
     qr: `XOXO-${numero}-${String(carte.serial).slice(0, 8)}`,
   };
 }
@@ -131,6 +136,7 @@ export async function genererPass(memberId: string): Promise<Buffer> {
           : { key: "prochain", label: "PRIVILÈGES", value: "Tous accessibles" },
       ],
       backFields: [
+        ...(d.annonce ? [{ key: "annonce", label: "Message du club", value: d.annonce.texte, changeMessage: "%@" }] : []),
         { key: "espace", label: "Ton espace membre", value: `${SITE}/ambassadeurs`, attributedValue: `<a href="${SITE}/ambassadeurs">Ouvrir mon espace</a>` },
         { key: "usage", label: "Comment l'utiliser", value: "Présente cette carte à l'équipe de La Commerciale pour profiter de tes privilèges. Ton solde se met à jour automatiquement." },
         { key: "depuis", label: "Membre depuis", value: new Date(p.created_at).toLocaleDateString("fr-FR", { month: "long", year: "numeric" }) },
@@ -180,12 +186,14 @@ export async function pousserCarte(memberId: string) {
 }
 
 /** Rafraîchit toutes les cartes installées (jour de soirée). */
-export async function pousserToutesLesCartes() {
+export async function pousserToutesLesCartes(membres?: string[]) {
   const admin = createAdminClient();
   const { data: regs } = await admin.from("wallet_registrations").select("serial");
   const series = [...new Set((regs ?? []).map((r) => r.serial))];
   if (!series.length) return 0;
-  const { data: cartes } = await admin.from("wallet_passes").select("member_id").in("serial", series);
+  let q = admin.from("wallet_passes").select("member_id").in("serial", series);
+  if (membres) q = q.in("member_id", membres.length ? membres : ["00000000-0000-0000-0000-000000000000"]);
+  const { data: cartes } = await q;
   let n = 0;
   for (const c of cartes ?? []) n += await pousserCarte(c.member_id);
   return n;
