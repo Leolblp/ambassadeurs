@@ -18,8 +18,7 @@ export function dateCourte(iso: string) {
 
 export const PREUVE: Record<string, string> = {
   screenshot: "capture",
-  photo: "photo",
-  video: "vidéo",
+  screenshot_link: "capture + lien",
   link: "lien",
   tickets: "billets avec ton code",
 };

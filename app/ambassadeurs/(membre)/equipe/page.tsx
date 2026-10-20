@@ -130,7 +130,7 @@ export default async function MaTeam() {
                         <img src={url} alt="Preuve" style={{ maxWidth: "100%", maxHeight: 320, objectFit: "contain" }} />}
                   </div>
                 )}
-                {!url && p.link && <a href={p.link} target="_blank" rel="noreferrer" style={{ display: "block", padding: 14, wordBreak: "break-all" }}>{p.link}</a>}
+                {p.link && <a href={p.link} target="_blank" rel="noreferrer" style={{ display: "block", padding: "14px 14px 0", fontSize: 13, wordBreak: "break-all" }}>{url ? "Voir la vidéo ↗" : p.link}</a>}
                 <div style={{ padding: 14, display: "flex", flexDirection: "column", gap: 10 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
                     <div>

@@ -87,8 +87,7 @@ export default async function GuideAdmin() {
           entetes={["Type de preuve", "Ce que le membre envoie"]}
           lignes={[
             ["Capture", "Une capture d'écran (story, publication)"],
-            ["Photo", "Une photo prise sur place (affichage en ville, soirée)"],
-            ["Vidéo", "Une courte vidéo"],
+            ["Capture + lien", "Pour toute vidéo (story, TikTok, réel) : la capture et le lien de la vidéo. Aucun fichier vidéo n'est envoyé."],
             ["Lien", "L'adresse d'une publication"],
             ["Billets avec ton code", "Rien : les points viennent des ventes faites avec son code"],
           ]}

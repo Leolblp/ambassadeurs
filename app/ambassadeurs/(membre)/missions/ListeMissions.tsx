@@ -68,6 +68,7 @@ function CarteMission({ m, uid }: { m: Mission; uid: string }) {
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [lien, setLien] = useState("");
+  const [capture, setCapture] = useState<File | null>(null);
 
   async function envoyer(fichierChoisi: File | null) {
     let fichier = fichierChoisi;
@@ -76,11 +77,16 @@ function CarteMission({ m, uid }: { m: Mission; uid: string }) {
     const supabase = createClient();
     let file_path: string | null = null;
 
-    if (fichier && fichier.type.startsWith("image/")) fichier = await compresser(fichier);
+    if (fichier && !fichier.type.startsWith("image/")) {
+      setErreur("Envoie une capture d'écran (image), pas de vidéo.");
+      setEnvoi(false);
+      return;
+    }
+    if (fichier) fichier = await compresser(fichier);
 
     if (fichier) {
-      if (fichier.size > 25 * 1024 * 1024) {
-        setErreur("Fichier trop lourd (25 Mo maximum).");
+      if (fichier.size > 10 * 1024 * 1024) {
+        setErreur("Image trop lourde (10 Mo maximum).");
         setEnvoi(false);
         return;
       }
@@ -135,13 +141,27 @@ function CarteMission({ m, uid }: { m: Mission; uid: string }) {
         </div>
       )}
 
-      {m.etat === "afaire" && ["screenshot", "photo", "video"].includes(m.proof_type) && (
+      {m.etat === "afaire" && m.proof_type === "screenshot_link" && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <label style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, minHeight: 52, border: "1px dashed var(--bord-rouge)", borderRadius: 14, fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
+            {capture ? `Capture : ${capture.name}` : "1. Choisir ma capture"}
+            <input type="file" accept="image/*" disabled={envoi} onChange={(e) => setCapture(e.target.files?.[0] ?? null)} style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer" }} />
+          </label>
+          <label htmlFor={`lien-${m.id}`} style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)" }}>Lien de ta vidéo</label>
+          <input id={`lien-${m.id}`} className="champ" type="url" placeholder="2. Lien de ta vidéo (https://…)" value={lien} onChange={(e) => setLien(e.target.value)} />
+          <button className="btn" type="button" disabled={envoi || !capture || !lien.trim()} onClick={() => envoyer(capture)} style={{ minHeight: 48 }}>
+            {envoi ? "Envoi en cours…" : "Envoyer ma preuve"}
+          </button>
+        </div>
+      )}
+
+      {m.etat === "afaire" && m.proof_type === "screenshot" && (
         <label style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, minHeight: 52, border: "1px dashed var(--bord-rouge)", borderRadius: 14, fontSize: 13, fontWeight: 700, cursor: envoi ? "default" : "pointer" }}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 16V4M6 10l6-6 6 6" /><path d="M4 20h16" /></svg>
           {envoi ? "Envoi en cours…" : "Envoyer ma preuve"}
           <input
             type="file"
-            accept={m.proof_type === "video" ? "video/*" : "image/*"}
+            accept="image/*"
             disabled={envoi}
             onChange={(e) => envoyer(e.target.files?.[0] ?? null)}
             style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer" }}
