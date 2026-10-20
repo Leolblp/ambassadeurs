@@ -103,3 +103,33 @@ export async function soumettreModele(m: (typeof MODELES_META)[number]) {
   const j = await r.json();
   return r.ok ? null : (j?.error?.error_user_msg || j?.error?.message || "Erreur Meta");
 }
+
+/** Ce que Meta voit réellement avec ce token (pour le diagnostic du back-office). */
+export async function diagnostic() {
+  const token = process.env.WHATSAPP_TOKEN;
+  if (!token) return { erreur: "WHATSAPP_TOKEN absent" };
+  const lire = async (url: string) => {
+    try {
+      const r = await fetch(url, { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" });
+      return await r.json();
+    } catch (e) {
+      return { error: { message: e instanceof Error ? e.message : "réseau" } };
+    }
+  };
+  const debug = await lire(`${GRAPH}/debug_token?input_token=${encodeURIComponent(token)}`);
+  const portees = (debug?.data?.granular_scopes ?? []) as { scope: string; target_ids?: string[] }[];
+  const numero = await lire(`${GRAPH}/${process.env.WHATSAPP_PHONE_NUMBER_ID}?fields=id,display_phone_number,verified_name`);
+  const comptes: { id: string; nom?: string; numeros?: string }[] = [];
+  for (const id of new Set(portees.flatMap((p) => p.target_ids ?? []))) {
+    const w = await lire(`${GRAPH}/${id}?fields=id,name,phone_numbers{id,display_phone_number}`);
+    if (w?.id) comptes.push({ id: w.id, nom: w.name, numeros: (w.phone_numbers?.data ?? []).map((n: { id: string; display_phone_number: string }) => `${n.display_phone_number} (${n.id})`).join(", ") });
+  }
+  return {
+    tokenFinPar: token.slice(-6),
+    wabaConfigure: process.env.WHATSAPP_WABA_ID,
+    portees: portees.map((p) => `${p.scope} : ${(p.target_ids ?? ["tous"]).join(", ")}`),
+    numero: numero?.error ? `Erreur : ${numero.error.message}` : `${numero.display_phone_number} · ${numero.verified_name}`,
+    comptes,
+    erreurDebug: debug?.error?.message,
+  };
+}

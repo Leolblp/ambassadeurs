@@ -1,6 +1,6 @@
 import { requireAdmin } from "@/lib/admin";
 import { dateCourte } from "@/lib/format";
-import { MODELES_META, statutsModeles } from "@/lib/whatsapp";
+import { diagnostic, MODELES_META, statutsModeles } from "@/lib/whatsapp";
 import { envoyerTest, soumettreModeles } from "../actions";
 import { BoutonAction } from "../ui";
 
@@ -19,6 +19,7 @@ export default async function WhatsApp() {
     supabase.from("whatsapp_log").select("id, template, ok, error, created_at").order("created_at", { ascending: false }).limit(30),
     supabase.from("profiles").select("id", { count: "exact", head: true }).eq("whatsapp_optin", true).eq("status", "active"),
   ]);
+  const diag = statuts.ok ? null : await diagnostic();
   const parNom = new Map(statuts.ok ? statuts.liste.map((t) => [t.name, t]) : []);
 
   return (
@@ -53,6 +54,13 @@ export default async function WhatsApp() {
           );
         })}
       </section>
+
+      {diag && (
+        <section className="carte" style={{ padding: 16, display: "flex", flexDirection: "column", gap: 6, fontSize: 13 }}>
+          <h2 className="label" style={{ margin: 0 }}>Diagnostic</h2>
+          <pre style={{ margin: 0, whiteSpace: "pre-wrap", wordBreak: "break-word", color: "var(--gris)" }}>{JSON.stringify(diag, null, 2)}</pre>
+        </section>
+      )}
 
       <section style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         <h2 className="label" style={{ margin: 0 }}>Derniers envois</h2>
