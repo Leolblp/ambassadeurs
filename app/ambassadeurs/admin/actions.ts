@@ -371,3 +371,30 @@ export async function envoyerAnnonce(_: Resultat, f: FormData): Promise<Resultat
   revalidatePath("/ambassadeurs/admin/notifications");
   return { ok: true, message: `Envoi en cours : ${cible}.` };
 }
+
+/* ---------- Suppression d'un membre ---------- */
+
+export async function supprimerMembre(id: string): Promise<Resultat> {
+  const { user } = await requireAdmin();
+  if (id === user.id) return { ok: false, message: "Tu ne peux pas supprimer ton propre compte." };
+  const admin = createAdminClient();
+  const { data: m } = await admin.from("profiles").select("first_name, email").eq("id", id).single();
+  if (!m) return { ok: false, message: "Membre introuvable." };
+
+  // 1. Fichiers de preuve
+  const { data: fichiers } = await admin.storage.from("proofs").list(id, { limit: 1000 });
+  if (fichiers?.length) await admin.storage.from("proofs").remove(fichiers.map((f) => `${id}/${f.name}`));
+
+  // 2. Références laissées par ce compte (s'il a validé des preuves ou ajusté des points)
+  await Promise.all([
+    admin.from("points_ledger").update({ created_by: null }).eq("created_by", id),
+    admin.from("proofs").update({ reviewed_by: null }).eq("reviewed_by", id),
+    admin.from("access_requests").update({ reviewed_by: null }).eq("reviewed_by", id),
+  ]);
+  if (m.email) await admin.from("access_requests").delete().eq("email", m.email);
+
+  // 3. Compte : supprime aussi profil, points, preuves, privilèges, carte Wallet (cascade)
+  const { error } = await admin.auth.admin.deleteUser(id);
+  revalidatePath("/ambassadeurs/admin/membres");
+  return error ? { ok: false, message: "Suppression impossible : " + error.message } : { ok: true, message: `${m.first_name ?? "Le membre"} a été supprimé.` };
+}

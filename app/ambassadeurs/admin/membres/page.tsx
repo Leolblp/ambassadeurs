@@ -1,10 +1,10 @@
 import { requireAdmin } from "@/lib/admin";
 import { numero, pts } from "@/lib/format";
-import { affecterEquipe, ajusterPoints, changerRole, changerStatutMembre } from "../actions";
+import { affecterEquipe, ajusterPoints, changerRole, changerStatutMembre, supprimerMembre } from "../actions";
 import { BoutonAction, FormAction } from "../ui";
 
 export default async function Membres() {
-  const { supabase } = await requireAdmin();
+  const { supabase, user } = await requireAdmin();
   const [{ data: membres }, { data: journal }, { data: ventes }, { data: equipes }] = await Promise.all([
     supabase.from("profiles").select("id, first_name, last_name, email, phone, instagram, member_number, promo_code, role, status, team_id").order("member_number"),
     supabase.from("points_ledger").select("member_id, delta"),
@@ -73,6 +73,13 @@ export default async function Membres() {
                   action={changerStatutMembre.bind(null, m.id, m.status === "active" ? "suspended" : "active")}
                   label={m.status === "active" ? "Suspendre" : "Réactiver"}
                   confirmer={m.status === "active" ? `Suspendre ${m.first_name} ? Il n'apparaîtra plus dans le classement.` : undefined}
+                />
+              )}
+              {m.id !== user.id && (
+                <BoutonAction
+                  action={supprimerMembre.bind(null, m.id)}
+                  label="Supprimer"
+                  confirmer={`Supprimer définitivement ${m.first_name} ${m.last_name ?? ""} ? Son compte, ses points, ses preuves et sa carte seront effacés. Impossible à annuler.`}
                 />
               )}
               </div>
