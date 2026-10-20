@@ -57,7 +57,7 @@ export async function donneesCarte(memberId: string) {
   ]);
   if (!p) throw new Error("Membre introuvable");
   const { data: annonce } = await admin.from("wallet_annonces").select("id, texte")
-    .or(p.team_id ? `team_id.is.null,team_id.eq.${p.team_id}` : "team_id.is.null")
+    .or(`membres.is.null,membres.cs.{${memberId}}`)
     .gte("created_at", new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString())
     .order("created_at", { ascending: false }).limit(1).maybeSingle();
   const points = Number(solde ?? 0);

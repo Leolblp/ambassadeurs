@@ -321,16 +321,46 @@ export async function envoyerTest(): Promise<Resultat> {
 export async function envoyerAnnonce(_: Resultat, f: FormData): Promise<Resultat> {
   const { user } = await requireAdmin();
   const texte = txt(f, "texte");
-  const team = txt(f, "team_id") || null;
+  const mode = txt(f, "mode") || "tous";
   if (!texte) return { ok: false, message: "Écris un message." };
   if (texte.length > 140) return { ok: false, message: "140 caractères maximum." };
   const admin = createAdminClient();
+
   let membres: string[] | undefined;
-  if (team) {
-    const { data } = await admin.from("profiles").select("id").eq("team_id", team).eq("status", "active");
+  let cible = "Tout le club";
+  let team: string | null = null;
+  if (mode === "team") {
+    team = txt(f, "team_id") || null;
+    if (!team) return { ok: false, message: "Choisis une team." };
+    const [{ data }, { data: t }] = await Promise.all([
+      admin.from("profiles").select("id").eq("team_id", team).eq("status", "active"),
+      admin.from("teams").select("name").eq("id", team).single(),
+    ]);
     membres = (data ?? []).map((m) => m.id);
+    cible = `Team ${t?.name ?? ""}`;
+  } else if (mode === "membres") {
+    membres = f.getAll("membres").map(String).filter(Boolean);
+    if (!membres.length) return { ok: false, message: "Choisis au moins un membre." };
+    cible = `${membres.length} membre${membres.length > 1 ? "s" : ""} choisi${membres.length > 1 ? "s" : ""}`;
+  } else if (mode === "points") {
+    const min = txt(f, "min") === "" ? -Infinity : Number(txt(f, "min"));
+    const max = txt(f, "max") === "" ? Infinity : Number(txt(f, "max"));
+    const [{ data: actifs }, { data: lignes }] = await Promise.all([
+      admin.from("profiles").select("id").eq("status", "active"),
+      admin.from("points_ledger").select("member_id, delta"),
+    ]);
+    const soldes = new Map<string, number>();
+    for (const l of lignes ?? []) soldes.set(l.member_id, (soldes.get(l.member_id) ?? 0) + Number(l.delta));
+    membres = (actifs ?? []).map((m) => m.id).filter((id) => {
+      const s = soldes.get(id) ?? 0;
+      return s >= min && s <= max;
+    });
+    cible = `Solde ${Number.isFinite(min) ? `≥ ${min}` : ""}${Number.isFinite(min) && Number.isFinite(max) ? " et " : ""}${Number.isFinite(max) ? `≤ ${max}` : ""} pts`.replace("Solde  pts", "Tous les soldes");
   }
-  const { data: annonce, error } = await admin.from("wallet_annonces").insert({ texte, team_id: team, created_by: user.id }).select("id").single();
+  if (membres && !membres.length) return { ok: false, message: "Aucun membre ne correspond à ce ciblage." };
+
+  const { data: annonce, error } = await admin.from("wallet_annonces")
+    .insert({ texte, team_id: team, membres: membres ?? null, cible, created_by: user.id }).select("id").single();
   if (error || !annonce) return { ok: false, message: "Envoi impossible : " + error?.message };
   after(async () => {
     const { pousserToutesLesCartes } = await import("@/lib/wallet");
@@ -339,5 +369,5 @@ export async function envoyerAnnonce(_: Resultat, f: FormData): Promise<Resultat
     await admin.from("wallet_annonces").update({ envoyes: apple + google }).eq("id", annonce.id);
   });
   revalidatePath("/ambassadeurs/admin/notifications");
-  return { ok: true, message: "Message en cours d'envoi sur les cartes Wallet." };
+  return { ok: true, message: `Envoi en cours : ${cible}.` };
 }
