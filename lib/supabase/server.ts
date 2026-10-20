@@ -24,3 +24,9 @@ export async function createClient() {
     }
   );
 }
+
+/** Identifiant de l'utilisateur connecté, vérifié localement (sans aller-retour réseau). */
+export async function getUserId(supabase: Awaited<ReturnType<typeof createClient>>) {
+  const { data } = await supabase.auth.getClaims();
+  return (data?.claims?.sub as string | undefined) ?? null;
+}

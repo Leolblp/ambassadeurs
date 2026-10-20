@@ -69,11 +69,14 @@ function CarteMission({ m, uid }: { m: Mission; uid: string }) {
   const [erreur, setErreur] = useState<string | null>(null);
   const [lien, setLien] = useState("");
 
-  async function envoyer(fichier: File | null) {
+  async function envoyer(fichierChoisi: File | null) {
+    let fichier = fichierChoisi;
     setErreur(null);
     setEnvoi(true);
     const supabase = createClient();
     let file_path: string | null = null;
+
+    if (fichier && fichier.type.startsWith("image/")) fichier = await compresser(fichier);
 
     if (fichier) {
       if (fichier.size > 25 * 1024 * 1024) {
@@ -160,4 +163,21 @@ function Statut({ couleur, children }: { couleur: string; children: React.ReactN
       {children}
     </div>
   );
+}
+
+/** Réduit une photo à 1600 px de large max en JPEG (une capture passe de ~3 Mo à ~300 Ko). */
+async function compresser(f: File): Promise<File> {
+  try {
+    const bitmap = await createImageBitmap(f);
+    const echelle = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height));
+    if (echelle === 1 && f.size < 800 * 1024) return f;
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(bitmap.width * echelle);
+    canvas.height = Math.round(bitmap.height * echelle);
+    canvas.getContext("2d")?.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    const blob = await new Promise<Blob | null>((r) => canvas.toBlob(r, "image/jpeg", 0.82));
+    return blob ? new File([blob], f.name.replace(/\.[^.]+$/, "") + ".jpg", { type: "image/jpeg" }) : f;
+  } catch {
+    return f; // format non lu par le navigateur (ex. HEIC sur certains Android) : envoi tel quel
+  }
 }

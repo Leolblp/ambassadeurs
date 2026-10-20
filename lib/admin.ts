@@ -1,11 +1,12 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getUserId } from "@/lib/supabase/server";
 
 /** Vérifie que l'utilisateur connecté est admin, sinon renvoie vers l'espace membre. */
 export async function requireAdmin() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/ambassadeurs/connexion");
+  const uid = await getUserId(supabase);
+  if (!uid) redirect("/ambassadeurs/connexion");
+  const user = { id: uid };
   const { data: profil } = await supabase.from("profiles").select("role, first_name").eq("id", user.id).single();
   if (profil?.role !== "admin") redirect("/ambassadeurs");
   return { supabase, user, profil };
@@ -14,8 +15,9 @@ export async function requireAdmin() {
 /** Admin ou chef d'équipe. Renvoie aussi la team dirigée, s'il y en a une. */
 export async function requireStaff() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/ambassadeurs/connexion");
+  const uid = await getUserId(supabase);
+  if (!uid) redirect("/ambassadeurs/connexion");
+  const user = { id: uid };
   const [{ data: profil }, { data: team }] = await Promise.all([
     supabase.from("profiles").select("role, first_name").eq("id", user.id).single(),
     supabase.from("teams").select("id, name, invite_code, bonus_percent").eq("leader_id", user.id).maybeSingle(),

@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getUserId } from "@/lib/supabase/server";
 
 export type Profil = {
   id: string;
@@ -15,8 +15,9 @@ export type Profil = {
 /** Charge le membre connecté, ou renvoie vers la connexion. */
 export async function getMembre() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/ambassadeurs/connexion");
+  const uid = await getUserId(supabase);
+  if (!uid) redirect("/ambassadeurs/connexion");
+  const user = { id: uid };
 
   const { data: profil } = await supabase
     .from("profiles")
