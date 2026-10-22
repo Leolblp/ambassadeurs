@@ -503,3 +503,76 @@ export async function supprimerPrivilege(id: string): Promise<Resultat> {
   rafraichirPrivileges();
   return error ? { ok: false, message: error.message } : { ok: true, message: "Supprimé." };
 }
+
+/* ---------- Ventes (Yurplan) ---------- */
+
+export async function importerVentes(_: Resultat, f: FormData): Promise<Resultat> {
+  await requireAdmin();
+  const fichier = f.get("fichier");
+  if (!(fichier instanceof File) || fichier.size === 0) return { ok: false, message: "Choisis un fichier d'export Yurplan (.csv ou .xlsx)." };
+  const XLSX = await import("xlsx");
+  const { codesMembres, enregistrerVente, trouverCode } = await import("@/lib/ventes");
+  const classeur = XLSX.read(Buffer.from(await fichier.arrayBuffer()), { type: "buffer", cellDates: true });
+  const lignes = XLSX.utils.sheet_to_json<unknown[]>(classeur.Sheets[classeur.SheetNames[0]], { header: 1, defval: "", raw: false });
+  const iEntete = lignes.findIndex((l) => l.some((c) => /commande|order|code/i.test(String(c))));
+  if (iEntete < 0) return { ok: false, message: "En-têtes introuvables : utilise l'export des commandes ou des participants de Yurplan." };
+  const entetes = lignes[iEntete].map((c) => String(c).toLowerCase());
+  const col = (re: RegExp) => entetes.findIndex((h) => re.test(h));
+  const cCommande = [col(/(n°|num|numéro|numero|id|référence|reference|ref).*commande|commande.*(n°|num|id|ref)/), col(/^commande$|order/), col(/commande/)].find((i) => i >= 0) ?? -1;
+  const cEvent = col(/événement|evenement|event|manifestation/);
+  const cStatut = col(/statut|status|état|etat/);
+  const cQuantite = col(/quantit|nombre de billets|nb billets|qty/);
+  const cBillet = col(/(n°|num|id|code).*billet|billet.*(n°|num|id)|ticket/);
+  if (cCommande < 0) return { ok: false, message: "Colonne « commande » introuvable dans le fichier." };
+
+  const codes = await codesMembres();
+  const commandes = new Map<string, { code: string; billets: number; evenement: string | null; items: string[] }>();
+  let sansCode = 0;
+  for (const l of lignes.slice(iEntete + 1)) {
+    const id = String(l[cCommande] ?? "").trim();
+    if (!id) continue;
+    if (cStatut >= 0 && /annul|rembours|cancel|refund/i.test(String(l[cStatut]))) continue;
+    const code = trouverCode(l, codes);
+    if (!code) { sansCode++; continue; }
+    const c = commandes.get(id) ?? { code, billets: 0, evenement: cEvent >= 0 ? String(l[cEvent]).trim() || null : null, items: [] };
+    c.billets += cQuantite >= 0 ? Math.max(1, parseInt(String(l[cQuantite]), 10) || 1) : 1;
+    if (cBillet >= 0 && l[cBillet]) c.items.push(String(l[cBillet]));
+    commandes.set(id, c);
+  }
+
+  const bilan = { nouvelle: 0, maj: 0, inchangee: 0 };
+  let billets = 0;
+  for (const [id, c] of commandes) {
+    const r = await enregistrerVente({ source: "yurplan", commande: id, code: c.code, membre: codes.get(c.code)!, billets: c.billets, evenement: c.evenement, items: c.items });
+    bilan[r]++;
+    billets += c.billets;
+  }
+  revalidatePath("/ambassadeurs/admin/ventes");
+  revalidatePath("/ambassadeurs/admin/membres");
+  return {
+    ok: true,
+    message: `${commandes.size} commande${commandes.size > 1 ? "s" : ""} avec code membre (${billets} billets) : ${bilan.nouvelle} nouvelle${bilan.nouvelle > 1 ? "s" : ""}, ${bilan.maj} mise${bilan.maj > 1 ? "s" : ""} à jour, ${bilan.inchangee} déjà importée${bilan.inchangee > 1 ? "s" : ""}. ${sansCode} ligne${sansCode > 1 ? "s" : ""} sans code ignorée${sansCode > 1 ? "s" : ""}.`,
+  };
+}
+
+export async function reglerPointsParBillet(_: Resultat, f: FormData): Promise<Resultat> {
+  const { supabase } = await requireAdmin();
+  const n = parseInt(txt(f, "points"), 10);
+  if (!Number.isFinite(n) || n < 0) return { ok: false, message: "Indique un nombre de points." };
+  const { error } = await supabase.from("app_settings").update({ points_per_ticket: n, updated_at: new Date().toISOString() }).eq("id", 1);
+  revalidatePath("/ambassadeurs/admin/ventes");
+  return error ? { ok: false, message: error.message } : { ok: true, message: `${n} points par billet pour les prochaines ventes.` };
+}
+
+export async function associerEvenement(nomYurplan: string, _: Resultat, f: FormData): Promise<Resultat> {
+  const { supabase } = await requireAdmin();
+  const soiree = txt(f, "event_id");
+  if (!soiree) return { ok: false, message: "Choisis une soirée." };
+  const admin = createAdminClient();
+  await admin.from("events").update({ yurplan_event: null }).eq("yurplan_event", nomYurplan);
+  const { error } = await supabase.from("events").update({ yurplan_event: nomYurplan }).eq("id", soiree);
+  if (error) return { ok: false, message: error.message };
+  await admin.from("sales").update({ event_id: soiree }).eq("yurplan_event", nomYurplan);
+  revalidatePath("/ambassadeurs/admin/ventes");
+  return { ok: true, message: "Associé." };
+}
