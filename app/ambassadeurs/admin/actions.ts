@@ -134,6 +134,44 @@ export async function creerSoiree(_: Resultat, f: FormData): Promise<Resultat> {
   return error ? { ok: false, message: error.message } : { ok: true, message: "Soirée ajoutée." };
 }
 
+export async function modifierSoiree(id: string, _: Resultat, f: FormData): Promise<Resultat> {
+  const { supabase } = await requireAdmin();
+  const nom = txt(f, "name");
+  const date = txt(f, "starts_at");
+  if (!nom || !date) return { ok: false, message: "Nom et date obligatoires." };
+  const { data: avant } = await supabase.from("events").select("starts_at").eq("id", id).single();
+  const debut = heureLyon(date);
+  const { error } = await supabase.from("events").update({
+    name: nom,
+    starts_at: debut,
+    description: txt(f, "description") || null,
+    ticket_url: txt(f, "ticket_url") || null,
+  }).eq("id", id);
+  if (error) return { ok: false, message: error.message };
+
+  // Si l'heure change, les échéances des missions liées suivent du même décalage
+  let decalees = 0;
+  const ecart = avant ? new Date(debut).getTime() - new Date(avant.starts_at).getTime() : 0;
+  if (ecart !== 0) {
+    const { data: missions } = await supabase.from("missions").select("id, deadline").eq("event_id", id).not("deadline", "is", null);
+    for (const m of missions ?? []) {
+      await supabase.from("missions").update({ deadline: new Date(new Date(m.deadline as string).getTime() + ecart).toISOString() }).eq("id", m.id);
+      decalees++;
+    }
+  }
+  // Les cartes Wallet affichent la prochaine soirée : on les rafraîchit
+  after(async () => {
+    const { pousserToutesLesCartes } = await import("@/lib/wallet");
+    const { majGoogle } = await import("@/lib/wallet/google");
+    await pousserToutesLesCartes().catch(() => 0);
+    const { data: g } = await createAdminClient().from("wallet_passes").select("member_id").eq("google", true);
+    for (const c of g ?? []) await majGoogle(c.member_id).catch(() => false);
+  });
+  revalidatePath("/ambassadeurs/admin/soirees");
+  revalidatePath("/ambassadeurs");
+  return { ok: true, message: decalees ? `Soirée modifiée, ${decalees} échéance${decalees > 1 ? "s" : ""} de mission décalée${decalees > 1 ? "s" : ""}.` : "Soirée modifiée." };
+}
+
 export async function supprimerSoiree(id: string): Promise<Resultat> {
   const { supabase } = await requireAdmin();
   const { error } = await supabase.from("events").delete().eq("id", id);
