@@ -88,7 +88,7 @@ export async function accepterDemande(id: string): Promise<Resultat> {
   for (let i = 2; i < 50; i++) {
     const { data: pris } = await admin.from("profiles").select("id").eq("promo_code", code).maybeSingle();
     if (!pris) break;
-    code = base.replace("-XOXO", `${i}-XOXO`);
+    code = base.replace(/XOXO$/, `${i}XOXO`);
   }
   await admin.from("profiles").update({ promo_code: code, team_id: d.team_id ?? null, whatsapp_optin: !!d.whatsapp_optin }).eq("id", cree.user.id);
   let canal = "par email";

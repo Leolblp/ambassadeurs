@@ -33,7 +33,7 @@ export function codeEquipe(nom: string) {
   return base + String(Math.floor(100 + Math.random() * 900));
 }
 
-/** "Léa" -> "LEA-XOXO" (sans accents ni espaces) */
+/** "Léa" -> "LEAXOXO" (majuscules et chiffres seulement : format des codes promo Yurplan) */
 export function codeDepuisPrenom(prenom: string) {
   const base = prenom
     .normalize("NFD")
@@ -41,5 +41,5 @@ export function codeDepuisPrenom(prenom: string) {
     .replace(/[^a-zA-Z]/g, "")
     .toUpperCase()
     .slice(0, 10) || "MEMBRE";
-  return `${base}-XOXO`;
+  return `${base}XOXO`;
 }

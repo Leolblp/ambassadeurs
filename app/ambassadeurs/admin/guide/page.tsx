@@ -62,7 +62,7 @@ export default async function GuideAdmin() {
         <Etapes items={[
           <>Ouvre <Link href="/ambassadeurs/admin/demandes">Demandes d&apos;accès</Link>.</>,
           <>Regarde le profil Instagram (cliquable) et la motivation. Si la demande vient d&apos;une team, c&apos;est indiqué sous le nom.</>,
-          <>Clique <b>Accepter</b> : le compte est créé, un numéro de membre et un code personnel (ex. <code>LEA-XOXO</code>) sont attribués, et l&apos;email « Bienvenue dans le XOXO Club » part automatiquement.</>,
+          <>Clique <b>Accepter</b> : le compte est créé, un numéro de membre et un code personnel (ex. <code>LEAXOXO</code>) sont attribués, et l&apos;email « Bienvenue dans le XOXO Club » part automatiquement.</>,
           <>Ou clique <b>Refuser</b> : la personne n&apos;est pas prévenue, la demande passe dans « Dernières décisions ».</>,
         ]} />
         <Encart titre="Sélection" ton="astuce">Garde le club rare. Mieux vaut 30 membres actifs que 200 inactifs. Les demandes venant d&apos;un chef d&apos;équipe peuvent aussi être acceptées par ce chef.</Encart>

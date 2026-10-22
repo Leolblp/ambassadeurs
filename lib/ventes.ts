@@ -9,20 +9,22 @@ export function cleWebhook() {
   return crypto.createHash("sha256").update(`yurplan:${base}`).digest("hex").slice(0, 32);
 }
 
-const norm = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").trim().toUpperCase();
+const norm = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toUpperCase();
+/** Code comparé sans tirets ni espaces : « leo-xoxo » = « LEOXOXO » */
+const compact = (s: string) => norm(s).replace(/[^A-Z0-9]/g, "");
 
 /** Codes membres actifs : CODE -> id du membre */
 export async function codesMembres() {
   const { data } = await createAdminClient().from("profiles").select("id, promo_code").not("promo_code", "is", null);
-  return new Map((data ?? []).map((p) => [norm(p.promo_code as string), p.id as string]));
+  return new Map((data ?? []).map((p) => [compact(p.promo_code as string), p.id as string]));
 }
 
 /** Cherche un code membre n'importe où dans un objet (commande, ligne d'export…). */
 export function trouverCode(valeur: unknown, codes: Map<string, string>): string | null {
   if (typeof valeur === "string") {
     const v = norm(valeur);
-    if (codes.has(v)) return v;
-    for (const morceau of v.split(/[\s,;:/|()]+/)) if (codes.has(morceau)) return morceau;
+    if (codes.has(compact(v))) return compact(v);
+    for (const morceau of v.split(/[\s,;:/|()]+/)) if (codes.has(compact(morceau))) return compact(morceau);
     return null;
   }
   if (Array.isArray(valeur)) {
