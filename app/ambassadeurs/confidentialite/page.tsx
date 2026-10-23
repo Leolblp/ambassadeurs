@@ -68,7 +68,8 @@ export default function Confidentialite() {
 
       <Bloc titre="Cookies">
         <p style={p0}>
-          Le site utilise uniquement les cookies nécessaires à ta connexion. Aucun cookie publicitaire ni de mesure d&apos;audience : aucun bandeau de
+          Le site utilise uniquement les cookies nécessaires à ta connexion. La fréquentation est mesurée de façon anonyme et sans cookie
+          (Vercel Web Analytics : aucune donnée permettant de t&apos;identifier n&apos;est conservée). Aucun cookie publicitaire : aucun bandeau de
           consentement n&apos;est donc nécessaire.
         </p>
       </Bloc>
