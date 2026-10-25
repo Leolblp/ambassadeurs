@@ -18,7 +18,10 @@ export async function POST(request: NextRequest) {
   const corps = (await request.json().catch(() => null)) as { trigger?: string; data?: unknown } | null;
   if (!corps) return NextResponse.json({ erreur: "JSON invalide" }, { status: 400 });
   const admin = createAdminClient();
-  const { data: journal } = await admin.from("yurplan_webhooks").insert({ trigger: corps.trigger ?? null, payload: corps }).select("id").single();
+  // On ne garde que le minimum (pas de nom, email ni téléphone des acheteurs)
+  const d = (corps.data ?? {}) as Commande & { answers?: unknown };
+  const resume = { identifier: d.identifier ?? null, event: d.event?.name ?? null, total: d.total?.amount ?? null, billets: d.tickets?.length ?? null };
+  const { data: journal } = await admin.from("yurplan_webhooks").insert({ trigger: corps.trigger ?? null, payload: resume }).select("id").single();
   const noter = (r: string) => journal && admin.from("yurplan_webhooks").update({ resultat: r }).eq("id", journal.id);
 
   try {
