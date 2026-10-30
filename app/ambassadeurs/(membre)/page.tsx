@@ -33,7 +33,7 @@ export default async function Accueil() {
         <Link href="/ambassadeurs/carte" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
           <div style={{ textAlign: "right" }}>
             <div style={{ fontSize: 13, fontWeight: 700 }}>{profil.first_name ?? "Membre"}</div>
-            <div className="label-gris" style={{ fontSize: 9 }}>Membre N° {numero(profil.member_number)}</div>
+            <div className="label-gris" style={{ fontSize: 11 }}>Membre N° {numero(profil.member_number)}</div>
           </div>
           <span aria-hidden="true" className="display" style={{ width: 40, height: 40, borderRadius: "50%", background: "var(--bord)", border: "1px solid var(--bord-rouge)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>
             {(profil.first_name?.[0] ?? "X") + (profil.last_name?.[0] ?? "")}
@@ -86,13 +86,13 @@ export default async function Accueil() {
       {soiree.data && (
         <section style={{ borderRadius: 20, padding: "18px 20px", background: "var(--rouge)", color: "var(--fond)", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
           <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: ".2em", textTransform: "uppercase" }}>Prochaine soirée</div>
+            <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: ".2em", textTransform: "uppercase" }}>Prochaine soirée</div>
             <div className="display" style={{ fontSize: 26, lineHeight: 1.05, marginTop: 4, textTransform: "uppercase" }}>{soiree.data.name}</div>
             <div style={{ fontSize: 13, fontWeight: 700, marginTop: 4, textTransform: "capitalize" }}>{dateSoiree(soiree.data.starts_at)}</div>
           </div>
           <div style={{ textAlign: "center", flex: "none" }}>
             <div className="display" style={{ fontSize: 30, lineHeight: 1 }}>{aFaire.length}</div>
-            <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: ".16em", textTransform: "uppercase" }}>missions</div>
+            <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: ".16em", textTransform: "uppercase" }}>missions</div>
           </div>
         </section>
       )}

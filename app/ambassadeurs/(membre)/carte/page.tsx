@@ -40,7 +40,7 @@ export default async function Carte() {
             <div className="display" style={{ fontSize: 22, textTransform: "uppercase", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{nom}</div>
             <div style={{ fontSize: 11, color: "var(--gris)", marginTop: 2 }}>Membre depuis {depuis}</div>
           </div>
-          <div className="label" style={{ fontSize: 9 }}>La Commerciale</div>
+          <div className="label" style={{ fontSize: 11 }}>La Commerciale</div>
         </div>
       </div>
 

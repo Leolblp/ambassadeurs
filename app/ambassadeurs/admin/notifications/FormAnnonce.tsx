@@ -25,7 +25,7 @@ export default function FormAnnonce({ membres, equipes }: { membres: MembreCible
 
   const onglet = (id: typeof mode, label: string) => (
     <button key={id} type="button" onClick={() => setMode(id)} aria-pressed={mode === id}
-      style={{ minHeight: 38, padding: "0 14px", borderRadius: 999, border: "1px solid var(--bord)", cursor: "pointer", font: "700 12px var(--font-body), system-ui", letterSpacing: ".06em", textTransform: "uppercase", background: mode === id ? "var(--rouge)" : "transparent", color: mode === id ? "var(--fond)" : "var(--gris)" }}>
+      style={{ minHeight: 44, padding: "0 14px", borderRadius: 999, border: "1px solid var(--bord)", cursor: "pointer", font: "700 12px var(--font-body), system-ui", letterSpacing: ".06em", textTransform: "uppercase", background: mode === id ? "var(--rouge)" : "transparent", color: mode === id ? "var(--fond)" : "var(--gris)" }}>
       {label}
     </button>
   );

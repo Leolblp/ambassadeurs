@@ -32,7 +32,7 @@ export default async function Membres() {
             <summary style={{ cursor: "pointer", listStyle: "none", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
               <span>
                 <b>N° {numero(m.member_number)} · {m.first_name} {m.last_name}</b>
-                {m.role === "admin" && <span className="label" style={{ marginLeft: 8, fontSize: 9 }}>Admin</span>}
+                {m.role === "admin" && <span className="label" style={{ marginLeft: 8, fontSize: 11 }}>Admin</span>}
                 {m.status === "suspended" && <span className="label-gris" style={{ marginLeft: 8 }}>Suspendu</span>}
                 <span style={{ display: "block", fontSize: 12, color: "var(--gris)", marginTop: 2 }}>{m.promo_code ?? "sans code"} · {billets.get(m.id) ?? 0} billets · {m.team_id ? `team ${nomEquipe.get(m.team_id)}` : "sans équipe"}{chefs.has(m.id) ? " (chef)" : ""}</span>
               </span>

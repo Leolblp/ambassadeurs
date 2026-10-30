@@ -47,7 +47,7 @@ export default function ListePrivileges({ privileges, solde }: { privileges: Pri
               </div>
               <div style={{ flex: "none", textAlign: "right" }}>
                 <div className="display" style={{ fontSize: 20, lineHeight: 1 }}>{p.cost.toLocaleString("fr-FR")}</div>
-                <div className="label-gris" style={{ fontSize: 9 }}>pts</div>
+                <div className="label-gris" style={{ fontSize: 11 }}>pts</div>
               </div>
             </div>
 

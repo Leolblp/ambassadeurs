@@ -18,11 +18,7 @@ export default function Nav({ chef = false }: { chef?: boolean }) {
   return (
     <nav
       aria-label="Navigation du club"
-      style={{
-        position: "fixed", left: 0, right: 0, bottom: 0, zIndex: 10,
-        background: "rgba(12,7,7,.94)", backdropFilter: "blur(10px)", borderTop: "1px solid var(--bord)",
-        paddingBottom: "env(safe-area-inset-bottom, 0px)",
-      }}
+      className="nav-bas"
     >
       <div style={{ maxWidth: 480, margin: "0 auto", display: "grid", gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))`, padding: "8px 8px 12px" }}>
         {items.map((it) => {
@@ -35,7 +31,7 @@ export default function Nav({ chef = false }: { chef?: boolean }) {
               style={{
                 display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4, minHeight: 48,
                 textDecoration: "none", color: actif ? "var(--rouge)" : "var(--gris)",
-                fontSize: 10, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase",
+                fontSize: 11, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase",
               }}
             >
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

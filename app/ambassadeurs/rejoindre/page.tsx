@@ -75,8 +75,8 @@ function Formulaire() {
               <div><label className="champ-label" htmlFor="prenom">Prénom</label><input className="champ" id="prenom" name="prenom" required autoComplete="given-name" /></div>
               <div><label className="champ-label" htmlFor="nom">Nom</label><input className="champ" id="nom" name="nom" required autoComplete="family-name" /></div>
             </div>
-            <div><label className="champ-label" htmlFor="insta">Instagram</label><input className="champ" id="insta" name="insta" placeholder="@toncompte" required /></div>
-            <div><label className="champ-label" htmlFor="email">Email</label><input className="champ" id="email" name="email" type="email" required autoComplete="email" /></div>
+            <div><label className="champ-label" htmlFor="insta">Instagram</label><input className="champ" id="insta" name="insta" placeholder="@toncompte" required autoCapitalize="none" autoCorrect="off" spellCheck={false} /></div>
+            <div><label className="champ-label" htmlFor="email">Email</label><input className="champ" id="email" name="email" type="email" required autoComplete="email" autoCapitalize="none" spellCheck={false} /></div>
             <div><label className="champ-label" htmlFor="tel">Téléphone (WhatsApp)</label><input className="champ" id="tel" name="tel" type="tel" autoComplete="tel" required placeholder="06 12 34 56 78" /></div>
             <label style={{ display: "flex", gap: 10, alignItems: "flex-start", fontSize: 13, lineHeight: 1.45, color: "var(--gris)", cursor: "pointer" }}>
               <input type="checkbox" name="whatsapp" style={{ marginTop: 3, width: 18, height: 18, accentColor: "var(--rouge)", flex: "none" }} />

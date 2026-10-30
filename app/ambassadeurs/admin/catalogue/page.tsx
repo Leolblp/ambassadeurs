@@ -56,7 +56,7 @@ export default async function Catalogue() {
                 <span>
                   <b>{p.name}</b>
                   {!p.is_active && <span className="label-gris" style={{ marginLeft: 8 }}>Masqué</span>}
-                  {p.is_active && epuise && <span className="label" style={{ marginLeft: 8, fontSize: 9 }}>Épuisé</span>}
+                  {p.is_active && epuise && <span className="label" style={{ marginLeft: 8, fontSize: 11 }}>Épuisé</span>}
                   <span style={{ display: "block", fontSize: 12, color: "var(--gris)", marginTop: 2 }}>
                     Stock : {p.stock === null ? "illimité" : p.stock} · {s.attente} à remettre · {s.remis} remis
                   </span>

@@ -4,7 +4,7 @@ import { useActionState, useState, useTransition } from "react";
 import type { Resultat } from "./actions";
 
 const styleBouton = (variante: "plein" | "vert" | "contour") => ({
-  minHeight: 42,
+  minHeight: 44,
   padding: "0 16px",
   borderRadius: 999,
   cursor: "pointer",
@@ -27,13 +27,14 @@ export function BoutonAction({
       <button
         type="button"
         disabled={enCours}
+        aria-busy={enCours}
         style={{ ...styleBouton(variante), opacity: enCours ? 0.5 : 1 }}
         onClick={() => {
           if (confirmer && !window.confirm(confirmer)) return;
           start(async () => setRes(await action()));
         }}
       >
-        {enCours ? "…" : label}
+        {enCours ? "En cours…" : label}
       </button>
       {res && <Message r={res} />}
     </span>
@@ -54,7 +55,7 @@ export function RefusAvecMotif({ action }: { action: (motif: string) => Promise<
       <div style={{ display: "flex", gap: 8 }}>
         <button type="button" style={styleBouton("contour")} onClick={() => setOuvert(false)}>Annuler</button>
         <button type="button" disabled={enCours} style={styleBouton("plein")} onClick={() => start(async () => setRes(await action(motif)))}>
-          {enCours ? "…" : "Confirmer le refus"}
+          {enCours ? "Envoi…" : "Confirmer le refus"}
         </button>
       </div>
       {res && <Message r={res} />}
@@ -71,7 +72,7 @@ export function FormAction({
     <form action={formAction} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
       {children}
       <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-        <button type="submit" disabled={enCours} className="btn" style={{ minHeight: 46 }}>{enCours ? "…" : bouton}</button>
+        <button type="submit" disabled={enCours} className="btn" style={{ minHeight: 46 }}>{enCours ? "Enregistrement…" : bouton}</button>
         {res && <Message r={res} />}
       </div>
     </form>

@@ -12,7 +12,7 @@ export default async function MembreLayout({ children }: { children: React.React
 
   return (
     <>
-      <div style={{ paddingBottom: 96 }}>{children}</div>
+      <div style={{ paddingBottom: "calc(96px + env(safe-area-inset-bottom, 0px))" }}>{children}</div>
       <Nav chef={!!team} />
     </>
   );

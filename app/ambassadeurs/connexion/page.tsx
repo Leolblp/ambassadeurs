@@ -28,7 +28,7 @@ function Titre({ titre, texte }: { titre: string; texte: string }) {
   );
 }
 
-const lienDiscret: React.CSSProperties = { background: "none", border: 0, color: "var(--gris)", fontSize: 14, cursor: "pointer", textDecoration: "underline", padding: 8 };
+const lienDiscret: React.CSSProperties = { background: "none", border: 0, color: "var(--gris)", fontSize: 14, cursor: "pointer", textDecoration: "underline", padding: "0 8px", minHeight: 44 };
 
 function ParWhatsApp({ versEmail }: { versEmail: () => void }) {
   const [etatTel, actionTel, envoiTel] = useActionState<EtatCode, FormData>(demanderCode, null);

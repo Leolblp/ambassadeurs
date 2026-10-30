@@ -77,7 +77,7 @@ export default async function MaTeam() {
           { l: `Ton bonus ${team.bonus_percent} %`, v: pts(bonusTotal) },
         ].map((k) => (
           <div key={k.l} className="carte" style={{ borderRadius: 14, padding: 12 }}>
-            <div className="label-gris" style={{ fontSize: 9 }}>{k.l}</div>
+            <div className="label-gris" style={{ fontSize: 11 }}>{k.l}</div>
             <div className="display" style={{ fontSize: 26, marginTop: 4 }}>{k.v}</div>
           </div>
         ))}

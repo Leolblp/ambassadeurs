@@ -13,10 +13,17 @@ export const metadata: Metadata = {
   title: "XOXO Club · La Commerciale",
   description: "Le cercle privé de La Commerciale. Sur invitation uniquement.",
   robots: { index: false, follow: false },
+  applicationName: "XOXO Club",
+  appleWebApp: { capable: true, title: "XOXO Club", statusBarStyle: "black" },
+  formatDetection: { telephone: false },
 };
 
 export const viewport: Viewport = {
   themeColor: "#0c0707",
+  colorScheme: "dark",
+  viewportFit: "cover",
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -40,7 +40,7 @@ export default function ListeMissions({ missions, uid }: { missions: Mission[]; 
               aria-selected={actif}
               onClick={() => setOnglet(o.id)}
               style={{
-                minHeight: 40, border: 0, borderRadius: 999, cursor: "pointer",
+                minHeight: 44, border: 0, borderRadius: 999, cursor: "pointer",
                 background: actif ? "var(--rouge)" : "transparent", color: actif ? "var(--fond)" : "var(--gris)",
                 font: "700 12px var(--font-body), system-ui, sans-serif", letterSpacing: ".08em", textTransform: "uppercase",
               }}
@@ -137,7 +137,7 @@ function CarteMission({ m, uid }: { m: Mission; uid: string }) {
         <div style={{ display: "flex", gap: 8 }}>
           <label htmlFor={`lien-${m.id}`} style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)" }}>Lien de ta publication</label>
           <input id={`lien-${m.id}`} className="champ" type="url" placeholder="https://instagram.com/…" value={lien} onChange={(e) => setLien(e.target.value)} />
-          <button className="btn" type="button" disabled={envoi || !lien.trim()} onClick={() => envoyer(null)} style={{ padding: "0 18px", minHeight: 48 }}>OK</button>
+          <button className="btn" type="button" disabled={envoi || !lien.trim()} onClick={() => envoyer(null)} style={{ padding: "0 18px", minHeight: 48 }}>{envoi ? "Envoi…" : "Envoyer"}</button>
         </div>
       )}
 
