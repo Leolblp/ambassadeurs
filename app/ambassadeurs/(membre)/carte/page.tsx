@@ -4,6 +4,7 @@ import { getMembre, numero, pts, RAISON } from "@/lib/membre";
 import Copier from "../../_components/Copier";
 import Deconnexion from "./Deconnexion";
 import ReglageWhatsApp from "./ReglageWhatsApp";
+import { LienCookies } from "@/app/_components/Consentement";
 
 export default async function Carte() {
   const { supabase, user, profil, solde } = await getMembre();
@@ -98,7 +99,7 @@ export default async function Carte() {
       )}
       <a href="/ambassadeurs/faq" style={{ alignSelf: "center", fontSize: 14 }}>Questions fréquentes</a>
       <p style={{ alignSelf: "center", margin: 0, fontSize: 12 }}>
-        <a href="/ambassadeurs/mentions-legales" style={{ color: "var(--gris)" }}>Mentions légales</a> · <a href="/ambassadeurs/confidentialite" style={{ color: "var(--gris)" }}>Confidentialité</a>
+        <a href="/ambassadeurs/mentions-legales" style={{ color: "var(--gris)" }}>Mentions légales</a> · <a href="/ambassadeurs/confidentialite" style={{ color: "var(--gris)" }}>Confidentialité</a> · <LienCookies />
       </p>
       <Deconnexion />
     </div>

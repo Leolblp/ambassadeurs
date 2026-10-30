@@ -1,4 +1,5 @@
 import { Bloc, PageLegale, p0 } from "../_components/PageLegale";
+import { LienCookies } from "@/app/_components/Consentement";
 
 export const metadata = { title: "Confidentialité · XOXO Club" };
 
@@ -6,7 +7,7 @@ const td: React.CSSProperties = { padding: "8px 10px", borderBottom: "1px solid 
 
 export default function Confidentialite() {
   return (
-    <PageLegale sur="Tes données" titre="Politique de confidentialité" maj="20 octobre 2026">
+    <PageLegale sur="Tes données" titre="Politique de confidentialité" maj="30 octobre 2026">
       <Bloc titre="Qui est responsable ?">
         <p style={p0}>
           MBC EVENTS (SASU, RCS Lyon 851 503 961), 33 avenue Jean Jaurès, 69370 Saint-Didier-au-Mont-d&apos;Or, qui exploite La Commerciale et le XOXO Club.
@@ -31,6 +32,7 @@ export default function Confidentialite() {
               <tr><td style={td}>Te connecter (code par WhatsApp ou lien par email)</td><td style={td}>Exécution de ton adhésion</td></tr>
               <tr><td style={td}>T&apos;envoyer les messages du club sur WhatsApp (missions, rappels, points)</td><td style={td}>Ton consentement, retirable à tout moment dans Ma carte</td></tr>
               <tr><td style={td}>Mettre à jour ta carte Wallet et t&apos;envoyer ses notifications</td><td style={td}>Ton consentement (ajout de la carte), retirable en la supprimant</td></tr>
+              <tr><td style={td}>Mesurer la fréquentation du site avec Google Analytics</td><td style={td}>Ton consentement, via le bandeau</td></tr>
               <tr><td style={td}>Lutter contre la fraude (preuves falsifiées, comptes multiples)</td><td style={td}>Intérêt légitime de MBC EVENTS</td></tr>
             </tbody>
           </table>
@@ -45,7 +47,7 @@ export default function Confidentialite() {
         </p>
         <p style={p0}>
           Prestataires techniques, qui traitent les données pour notre compte : Vercel (hébergement), Supabase (base de données, Union européenne),
-          Meta (WhatsApp), Resend (emails), Apple et Google (cartes Wallet). Certains sont établis aux États-Unis : les transferts sont encadrés par le
+          Meta (WhatsApp), Resend (emails), Apple et Google (cartes Wallet), Google (mesure d&apos;audience, si tu l&apos;acceptes). Certains sont établis aux États-Unis : les transferts sont encadrés par le
           Data Privacy Framework UE-États-Unis ou par les clauses contractuelles types de la Commission européenne.
         </p>
       </Bloc>
@@ -66,12 +68,24 @@ export default function Confidentialite() {
         </p>
       </Bloc>
 
-      <Bloc titre="Cookies">
+      <Bloc titre="Cookies et mesure d'audience">
         <p style={p0}>
-          Le site utilise uniquement les cookies nécessaires à ta connexion. La fréquentation est mesurée de façon anonyme et sans cookie
-          (Vercel Web Analytics : aucune donnée permettant de t&apos;identifier n&apos;est conservée). Aucun cookie publicitaire : aucun bandeau de
-          consentement n&apos;est donc nécessaire.
+          <b>Cookies nécessaires</b> : ceux qui gardent ta session ouverte quand tu te connectes. Ils ne demandent pas d&apos;accord et ne servent à rien d&apos;autre.
         </p>
+        <p style={p0}>
+          <b>Mesure d&apos;audience anonyme</b> : Vercel Web Analytics compte les visites sans cookie et sans conserver de donnée permettant de t&apos;identifier.
+        </p>
+        <p style={p0}>
+          <b>Google Analytics</b> (Google Ireland Limited) : uniquement si tu l&apos;acceptes dans le bandeau. Il sert à mesurer la fréquentation du site
+          (pages vues, provenance, appareil) pour l&apos;améliorer. Il dépose les cookies <code>_ga</code> et <code>_ga_*</code>, conservés 13 mois au
+          maximum. Les données peuvent être transférées aux États-Unis, dans le cadre du Data Privacy Framework UE-États-Unis. Elles ne servent pas à de
+          la publicité.
+        </p>
+        <p style={p0}>
+          Ton choix est conservé 6 mois, puis on te le redemande. Tu peux le changer à tout moment avec le lien « Gérer les cookies », en bas des pages.
+          Refuser n&apos;a aucune conséquence sur ton accès au club.
+        </p>
+        <p style={p0}><LienCookies style={{ color: "var(--encre)" }} /></p>
       </Bloc>
     </PageLegale>
   );

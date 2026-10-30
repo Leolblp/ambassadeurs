@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Anton, Instrument_Serif, Manrope } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import Script from "next/script";
+import Consentement from "./_components/Consentement";
 import "./globals.css";
 
 const display = Anton({ weight: "400", subsets: ["latin"], variable: "--font-display" });
@@ -33,14 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {children}
         <Analytics />
         <SpeedInsights />
-        {/* Google tag (gtag.js) */}
-        <Script src="https://www.googletagmanager.com/gtag/js?id=G-2CHM5HR6Q7" strategy="afterInteractive" />
-        <Script id="gtag-init" strategy="afterInteractive">
-          {`window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
-gtag('config', 'G-2CHM5HR6Q7');`}
-        </Script>
+        <Consentement />
       </body>
     </html>
   );

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { LienCookies } from "@/app/_components/Consentement";
 
 export function PageLegale({ sur, titre, maj, children }: { sur: string; titre: string; maj: string; children: React.ReactNode }) {
   return (
@@ -15,7 +16,7 @@ export function PageLegale({ sur, titre, maj, children }: { sur: string; titre: 
       </header>
       <div style={{ display: "flex", flexDirection: "column", gap: 22, fontSize: 14, lineHeight: 1.65 }}>{children}</div>
       <p style={{ margin: 0, fontSize: 12, color: "var(--gris)", textAlign: "center" }}>
-        <Link href="/ambassadeurs/mentions-legales" style={{ color: "var(--gris)" }}>Mentions légales</Link> · <Link href="/ambassadeurs/confidentialite" style={{ color: "var(--gris)" }}>Confidentialité</Link> · <Link href="/ambassadeurs/faq" style={{ color: "var(--gris)" }}>FAQ</Link>
+        <Link href="/ambassadeurs/mentions-legales" style={{ color: "var(--gris)" }}>Mentions légales</Link> · <Link href="/ambassadeurs/confidentialite" style={{ color: "var(--gris)" }}>Confidentialité</Link> · <Link href="/ambassadeurs/faq" style={{ color: "var(--gris)" }}>FAQ</Link> · <LienCookies />
       </p>
     </div>
   );
