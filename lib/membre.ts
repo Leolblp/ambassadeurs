@@ -23,11 +23,16 @@ export async function getMembre() {
 
   const { data: profil } = await supabase
     .from("profiles")
-    .select("id, first_name, last_name, member_number, promo_code, role, created_at, team_id, phone, whatsapp_optin")
+    .select("id, first_name, last_name, member_number, promo_code, role, created_at, team_id, phone, whatsapp_optin, status")
     .eq("id", user.id)
     .single<Profil>();
 
   if (!profil) redirect("/ambassadeurs/connexion");
+  // Compte suspendu ou créé hors demande d'accès : pas d'accès membre
+  if ((profil as Profil & { status?: string }).status !== "active") {
+    await supabase.auth.signOut();
+    redirect("/ambassadeurs/connexion");
+  }
 
   const { data: solde } = await supabase.rpc("member_balance", { p_member: user.id });
 

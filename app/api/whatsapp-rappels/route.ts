@@ -10,7 +10,7 @@ export const maxDuration = 60;
  * 2. alerte aux chefs d'équipe qui ont des preuves de leur team en attente.
  */
 export async function GET(request: NextRequest) {
-  if (request.headers.get("authorization") !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!process.env.CRON_SECRET || request.headers.get("authorization") !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ erreur: "non autorisé" }, { status: 401 });
   }
   if (!process.env.WHATSAPP_TOKEN) return NextResponse.json({ ignore: "WhatsApp non configuré" });

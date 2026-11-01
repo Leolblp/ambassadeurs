@@ -40,8 +40,18 @@ export async function verifierCode(_: EtatCode, f: FormData): Promise<EtatCode> 
   if (code.length < 6) return { etape: "code", tel, erreur: "Entre le code reçu sur WhatsApp." };
   const m = await membreParTel(tel);
   if (!m?.email) return { etape: "code", tel, erreur: "Code incorrect ou expiré." };
+  // 5 essais ratés en 15 min : le code est invalidé (un nouveau lien remplace l'ancien) et le numéro est bloqué 15 min
+  const admin = createAdminClient();
+  const depuis = new Date(Date.now() - 15 * 60 * 1000).toISOString();
+  const { count } = await admin.from("login_attempts").select("id", { count: "exact", head: true }).eq("member_id", m.id).gte("created_at", depuis);
+  if ((count ?? 0) >= 5) return { etape: "tel", erreur: "Trop d'essais. Réessaie dans 15 minutes." };
   const supabase = await createClient();
   const { error } = await supabase.auth.verifyOtp({ email: m.email, token: code, type: "email" });
-  if (error) return { etape: "code", tel, erreur: "Code incorrect ou expiré." };
+  if (error) {
+    await admin.from("login_attempts").insert({ member_id: m.id });
+    if ((count ?? 0) + 1 >= 5) await admin.auth.admin.generateLink({ type: "magiclink", email: m.email });
+    return { etape: "code", tel, erreur: "Code incorrect ou expiré." };
+  }
+  await admin.from("login_attempts").delete().eq("member_id", m.id);
   redirect("/ambassadeurs");
 }

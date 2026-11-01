@@ -90,7 +90,7 @@ export async function accepterDemande(id: string): Promise<Resultat> {
     if (!pris) break;
     code = base.replace(/XOXO$/, `${i}XOXO`);
   }
-  await admin.from("profiles").update({ promo_code: code, team_id: d.team_id ?? null, whatsapp_optin: !!d.whatsapp_optin }).eq("id", cree.user.id);
+  await admin.from("profiles").update({ promo_code: code, team_id: d.team_id ?? null, whatsapp_optin: !!d.whatsapp_optin, status: "active" }).eq("id", cree.user.id);
   let canal = "par email";
   if (parWhatsApp) {
     const { data: lien } = await admin.auth.admin.generateLink({ type: "magiclink", email: d.email });
