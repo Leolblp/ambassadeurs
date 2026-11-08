@@ -56,15 +56,19 @@ export async function envoyerCode(c: Compte) {
   const { data, error } = await admin.auth.admin.generateLink({ type: "magiclink", email: c.email });
   const code = data?.properties?.email_otp;
   if (error || !code) return false;
+  // WhatsApp a déjà échoué pour ce numéro (pas de compte WhatsApp…) : directement par SMS
+  const { data: echecWa } = await admin.from("whatsapp_log").select("id").eq("member_id", c.id).eq("template", "xoxo_code").eq("statut", "failed")
+    .gte("created_at", new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString()).limit(1);
+  if (echecWa?.length && process.env.SMSFACTOR_TOKEN) return envoyerSms(c.id, c.phone, texteSms(code));
   const parWhatsApp = await envoyerWhatsApp({ id: c.id, phone: c.phone, whatsapp_optin: true }, "xoxo_code", [code], { bouton: code });
   return parWhatsApp || (await envoyerSms(c.id, c.phone, texteSms(code)));
 }
 
-/** Secours après un échec de distribution WhatsApp : nouveau code envoyé par SMS (une seule fois par 10 min). */
+/** Secours après un échec de distribution WhatsApp : nouveau code envoyé par SMS (au plus un toutes les 45 s). */
 export async function envoyerCodeSms(memberId: string) {
   const admin = createAdminClient();
   const { data: dejaSms } = await admin.from("whatsapp_log").select("id").eq("member_id", memberId).eq("template", "sms_code")
-    .gte("created_at", new Date(Date.now() - 10 * 60 * 1000).toISOString()).limit(1);
+    .gte("created_at", new Date(Date.now() - 45 * 1000).toISOString()).limit(1);
   if (dejaSms?.length) return false;
   const { data: p } = await admin.from("profiles").select("email, phone, status").eq("id", memberId).maybeSingle();
   if (!p?.email || p.status === "suspended") return false;
