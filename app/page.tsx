@@ -25,7 +25,8 @@ export default function Entree() {
           <Image src="/logo-xoxo.png" alt="XOXO Club" width={1454} height={862} priority style={{ width: "100%", height: "auto" }} />
         </h1>
         <p className="label" style={{ margin: 0, letterSpacing: ".28em" }}>La carte de La Commerciale</p>
-        <p className="serif" style={{ margin: 0, fontSize: "clamp(32px, 4.4vw, 50px)", lineHeight: 1.05 }}>Gratuite. Personnelle. Prioritaire.</p>
+        <p className="serif" style={{ margin: 0, fontSize: "clamp(32px, 4.4vw, 50px)", lineHeight: 1.05 }}>Ton nom est déjà sur la liste.</p>
+        <p className="label-gris" style={{ margin: "-6px 0 0" }}>Carte gratuite · 18 ans et plus</p>
 
         <CarteFid />
 
