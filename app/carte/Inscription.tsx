@@ -16,7 +16,8 @@ export default function Inscription() {
   const erreurForm = etatCode?.etape === "form" ? etatCode.erreur : etat?.erreur;
 
   return (
-    <div className="ecran grain" style={{ gap: 22 }}>
+    <div className="grain" style={{ minHeight: "100dvh", background: "radial-gradient(90% 60% at 50% 0%, rgba(255, 26, 26, .12), transparent 70%)" }}>
+    <div className="ecran" style={{ gap: 22 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <Link href="/" aria-label="Retour" style={{ display: "inline-flex", width: 44, height: 44, alignItems: "center", justifyContent: "center", border: "1px solid var(--bord)", borderRadius: "50%" }}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6" /></svg>
@@ -93,6 +94,7 @@ export default function Inscription() {
           </form>
         </div>
       )}
+    </div>
     </div>
   );
 }

@@ -10,7 +10,7 @@ export default async function DevenirAmbassadeur() {
     supabase.from("app_settings").select("points_per_ticket").single(),
   ]);
   return (
-    <div className="ecran grain" style={{ gap: 20, minHeight: "auto" }}>
+    <div className="ecran" style={{ gap: 20, minHeight: "auto" }}>
       <div>
         <p className="label" style={{ margin: 0 }}>Programme ambassadeur</p>
         <h1 className="serif" style={{ margin: "6px 0 0", fontSize: 34, lineHeight: 1.05 }}>Fais vivre les nuits de La Commerciale.</h1>
