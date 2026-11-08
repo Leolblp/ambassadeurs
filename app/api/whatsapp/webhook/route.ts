@@ -1,6 +1,7 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { envoyerCodeSms } from "@/lib/otp";
 
 export const runtime = "nodejs";
 
@@ -41,7 +42,7 @@ export async function POST(request: NextRequest) {
   for (const e of corps.entry ?? []) for (const c of e.changes ?? []) for (const s of c.value?.statuses ?? []) {
     if (!s.id || !s.status || !(s.status in ORDRE)) continue;
     console.log("[webhook-wa] statut", s.status, s.errors?.[0] ? JSON.stringify(s.errors[0]).slice(0, 300) : "");
-    const { data: ligne } = await admin.from("whatsapp_log").select("id, statut").eq("wamid", s.id).maybeSingle();
+    const { data: ligne } = await admin.from("whatsapp_log").select("id, statut, template, member_id, created_at").eq("wamid", s.id).maybeSingle();
     // Messages qu'on n'a pas envoyés : ignorés. Un statut ne recule jamais (read puis delivered arrivé en retard).
     if (!ligne || (ORDRE[ligne.statut ?? ""] ?? 0) >= ORDRE[s.status] && s.status !== "failed") continue;
     const err = s.errors?.[0];
@@ -51,6 +52,11 @@ export async function POST(request: NextRequest) {
       statut_at: s.timestamp ? new Date(Number(s.timestamp) * 1000).toISOString() : new Date().toISOString(),
       ...(raison ? { statut_erreur: raison } : {}),
     }).eq("id", ligne.id);
+    // Code de connexion non distribuable sur WhatsApp (numéro sans WhatsApp, app trop ancienne…) : secours par SMS,
+    // seulement si l'envoi date de moins de 10 min (la personne attend encore son code)
+    if (s.status === "failed" && ligne.template === "xoxo_code" && ligne.member_id && Date.now() - new Date(ligne.created_at).getTime() < 10 * 60 * 1000) {
+      await envoyerCodeSms(ligne.member_id).catch(() => false);
+    }
   }
   return NextResponse.json({ ok: true });
 }

@@ -38,7 +38,7 @@ function ParWhatsApp() {
   if (etape === "code") {
     return (
       <>
-        <Titre titre="Ton code arrive." texte="Si ce numéro est celui d'un membre, tu viens de recevoir un code à 6 chiffres sur WhatsApp." />
+        <Titre titre="Ton code arrive." texte="Si ce numéro est celui d'un membre, tu viens de recevoir un code à 6 chiffres sur WhatsApp (ou par SMS si WhatsApp ne passe pas)." />
         <form action={actionCode} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           <input type="hidden" name="tel" value={tel} />
           <div>

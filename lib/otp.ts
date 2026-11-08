@@ -2,6 +2,7 @@ import "server-only";
 import { headers } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { envoyerWhatsApp, telInternational } from "@/lib/whatsapp";
+import { envoyerSms } from "@/lib/sms";
 
 export type Compte = { id: string; email: string | null; phone: string | null; status: string; kind: string };
 
@@ -38,17 +39,39 @@ export async function envoiAutorise(tel: string) {
   return true;
 }
 
-/** Envoie le code de connexion sur WhatsApp (au plus un toutes les 45 s par compte). */
+/** Texte du SMS de secours. */
+export const texteSms = (code: string) => `${code} est ton code La Commerciale. Ne le partage avec personne.`;
+
+/**
+ * Envoie le code de connexion sur WhatsApp (au plus un toutes les 45 s par compte).
+ * Si WhatsApp refuse l'envoi tout de suite, le code part par SMS. Si WhatsApp l'accepte puis ne peut pas
+ * le distribuer, le webhook de statut déclenche le SMS (envoyerCodeSms).
+ */
 export async function envoyerCode(c: Compte) {
   if (!c.email) return false;
   const admin = createAdminClient();
-  const { data: recent } = await admin.from("whatsapp_log").select("id").eq("member_id", c.id).eq("template", "xoxo_code")
+  const { data: recent } = await admin.from("whatsapp_log").select("id").eq("member_id", c.id).in("template", ["xoxo_code", "sms_code"])
     .gte("created_at", new Date(Date.now() - 45 * 1000).toISOString()).limit(1);
   if (recent?.length) return true;
   const { data, error } = await admin.auth.admin.generateLink({ type: "magiclink", email: c.email });
   const code = data?.properties?.email_otp;
   if (error || !code) return false;
-  return envoyerWhatsApp({ id: c.id, phone: c.phone, whatsapp_optin: true }, "xoxo_code", [code], { bouton: code });
+  const parWhatsApp = await envoyerWhatsApp({ id: c.id, phone: c.phone, whatsapp_optin: true }, "xoxo_code", [code], { bouton: code });
+  return parWhatsApp || (await envoyerSms(c.id, c.phone, texteSms(code)));
+}
+
+/** Secours après un échec de distribution WhatsApp : nouveau code envoyé par SMS (une seule fois par 10 min). */
+export async function envoyerCodeSms(memberId: string) {
+  const admin = createAdminClient();
+  const { data: dejaSms } = await admin.from("whatsapp_log").select("id").eq("member_id", memberId).eq("template", "sms_code")
+    .gte("created_at", new Date(Date.now() - 10 * 60 * 1000).toISOString()).limit(1);
+  if (dejaSms?.length) return false;
+  const { data: p } = await admin.from("profiles").select("email, phone, status").eq("id", memberId).maybeSingle();
+  if (!p?.email || p.status === "suspended") return false;
+  const { data, error } = await admin.auth.admin.generateLink({ type: "magiclink", email: p.email });
+  const code = data?.properties?.email_otp;
+  if (error || !code) return false;
+  return envoyerSms(memberId, p.phone, texteSms(code));
 }
 
 /**

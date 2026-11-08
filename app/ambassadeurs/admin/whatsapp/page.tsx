@@ -8,6 +8,7 @@ export const dynamic = "force-dynamic";
 
 const LIVRAISON: Record<string, { label: string; couleur: string }> = {
   sent: { label: "Envoyé (pas encore distribué)", couleur: "var(--ambre)" },
+  sms: { label: "SMS envoyé", couleur: "var(--vert)" },
   delivered: { label: "Distribué", couleur: "var(--vert)" },
   read: { label: "Lu", couleur: "var(--vert)" },
   failed: { label: "Échec", couleur: "var(--rouge)" },
@@ -76,7 +77,7 @@ export default async function WhatsApp() {
         {(journal ?? []).map((j) => (
           <div key={j.id} className="carte" style={{ borderRadius: 12, padding: "10px 14px", fontSize: 13, display: "flex", flexDirection: "column", gap: 4 }}>
             <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
-              <span><b style={{ color: (LIVRAISON[j.statut ?? (j.ok ? "sent" : "failed")] ?? LIVRAISON.sent).couleur }}>{(LIVRAISON[j.statut ?? (j.ok ? "sent" : "failed")] ?? LIVRAISON.sent).label}</b> · {j.template}</span>
+              <span><b style={{ color: (LIVRAISON[j.statut ?? (j.ok ? "sent" : "failed")] ?? LIVRAISON.sent).couleur }}>{j.template === "sms_code" && j.ok ? "SMS envoyé" : (LIVRAISON[j.statut ?? (j.ok ? "sent" : "failed")] ?? LIVRAISON.sent).label}</b> · {j.template === "sms_code" ? "code par SMS" : j.template}</span>
               <span style={{ color: "var(--gris)" }}>{dateCourte(j.created_at)}</span>
             </div>
             {(() => { const p = j.profiles as unknown as { first_name: string | null; last_name: string | null; phone: string | null } | null; return p ? <div style={{ color: "var(--gris)" }}>{[p.first_name, p.last_name].filter(Boolean).join(" ")} · {p.phone}</div> : null; })()}

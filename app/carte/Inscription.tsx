@@ -85,7 +85,7 @@ export default function Inscription() {
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           <p style={{ margin: 0, lineHeight: 1.55, color: "var(--gris)" }}>
-            Si ce numéro peut recevoir un code, il arrive sur WhatsApp au <b style={{ color: "var(--encre)" }}>{tel}</b>.
+            Ton code arrive sur WhatsApp (ou par SMS si WhatsApp ne passe pas) au <b style={{ color: "var(--encre)" }}>{tel}</b>.
           </p>
           <form action={verifier} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             <input type="hidden" name="tel" value={tel} />
