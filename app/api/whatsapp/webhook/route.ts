@@ -30,6 +30,7 @@ export async function POST(request: NextRequest) {
     const recu = request.headers.get("x-hub-signature-256") ?? "";
     const calcule = "sha256=" + createHmac("sha256", secret).update(brut).digest("hex");
     if (recu.length !== calcule.length || !timingSafeEqual(Buffer.from(recu), Buffer.from(calcule))) {
+      console.warn("[webhook-wa] signature refusée (vérifier WHATSAPP_APP_SECRET : clé de la même app que le webhook)", recu ? "signature présente" : "sans signature");
       return NextResponse.json({ erreur: "signature invalide" }, { status: 401 });
     }
   }
@@ -39,6 +40,7 @@ export async function POST(request: NextRequest) {
   const admin = createAdminClient();
   for (const e of corps.entry ?? []) for (const c of e.changes ?? []) for (const s of c.value?.statuses ?? []) {
     if (!s.id || !s.status || !(s.status in ORDRE)) continue;
+    console.log("[webhook-wa] statut", s.status, s.errors?.[0] ? JSON.stringify(s.errors[0]).slice(0, 300) : "");
     const { data: ligne } = await admin.from("whatsapp_log").select("id, statut").eq("wamid", s.id).maybeSingle();
     // Messages qu'on n'a pas envoyés : ignorés. Un statut ne recule jamais (read puis delivered arrivé en retard).
     if (!ligne || (ORDRE[ligne.statut ?? ""] ?? 0) >= ORDRE[s.status] && s.status !== "failed") continue;

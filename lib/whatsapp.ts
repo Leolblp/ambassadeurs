@@ -16,6 +16,8 @@ export function telInternational(tel: string | null | undefined): string | null 
   if (!tel) return null;
   let t = tel.replace(/[^\d+]/g, "");
   if (t.startsWith("00")) t = "+" + t.slice(2);
+  // Mobile français saisi sans le 0 (« 6 78 05 36 65 » ou « +6 78… ») : on ajoute l'indicatif
+  if (/^\+?[67]\d{8}$/.test(t)) t = "+33" + t.replace("+", "");
   // « +33 06… » : le 0 national saisi après l'indicatif est retiré
   if (/^\+330[1-9]\d{8}$/.test(t)) t = "+33" + t.slice(4);
   if (/^0[1-9]\d{8}$/.test(t)) t = "+33" + t.slice(1);
