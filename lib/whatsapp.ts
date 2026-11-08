@@ -38,6 +38,7 @@ export async function envoyerWhatsApp(dest: Destinataire, modele: Modele, variab
 
   let ok = false;
   let erreur: string | null = null;
+  let wamid: string | null = null;
   try {
     const r = await fetch(`https://graph.facebook.com/v23.0/${idNumero}/messages`, {
       method: "POST",
@@ -58,11 +59,12 @@ export async function envoyerWhatsApp(dest: Destinataire, modele: Modele, variab
     });
     ok = r.ok;
     if (!r.ok) erreur = (await r.text()).slice(0, 500);
+    else wamid = ((await r.json().catch(() => null)) as { messages?: { id?: string }[] } | null)?.messages?.[0]?.id ?? null;
   } catch (e) {
     erreur = e instanceof Error ? e.message : "erreur réseau";
   }
   try {
-    await createAdminClient().from("whatsapp_log").insert({ member_id: dest.id, template: modele, ok, error: erreur });
+    await createAdminClient().from("whatsapp_log").insert({ member_id: dest.id, template: modele, ok, error: erreur, wamid, statut: ok ? "sent" : "failed" });
   } catch {}
   return ok;
 }

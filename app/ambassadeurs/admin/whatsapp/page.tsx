@@ -6,6 +6,13 @@ import { BoutonAction } from "../ui";
 
 export const dynamic = "force-dynamic";
 
+const LIVRAISON: Record<string, { label: string; couleur: string }> = {
+  sent: { label: "Envoyé (pas encore distribué)", couleur: "var(--ambre)" },
+  delivered: { label: "Distribué", couleur: "var(--vert)" },
+  read: { label: "Lu", couleur: "var(--vert)" },
+  failed: { label: "Échec", couleur: "var(--rouge)" },
+};
+
 const STATUT: Record<string, { label: string; couleur: string }> = {
   APPROVED: { label: "Approuvé", couleur: "var(--vert)" },
   PENDING: { label: "En cours de validation", couleur: "var(--ambre)" },
@@ -16,7 +23,7 @@ export default async function WhatsApp() {
   const { supabase } = await requireAdmin();
   const [statuts, { data: journal }, { count: inscrits }] = await Promise.all([
     statutsModeles(),
-    supabase.from("whatsapp_log").select("id, template, ok, error, created_at").order("created_at", { ascending: false }).limit(30),
+    supabase.from("whatsapp_log").select("id, template, ok, error, created_at, statut, statut_erreur, statut_at, profiles(first_name, last_name, phone)").order("created_at", { ascending: false }).limit(30),
     supabase.from("profiles").select("id", { count: "exact", head: true }).eq("whatsapp_optin", true).eq("status", "active"),
   ]);
   const diag = statuts.ok ? null : await diagnostic();
@@ -68,9 +75,11 @@ export default async function WhatsApp() {
         {(journal ?? []).map((j) => (
           <div key={j.id} className="carte" style={{ borderRadius: 12, padding: "10px 14px", fontSize: 13, display: "flex", flexDirection: "column", gap: 4 }}>
             <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
-              <span><b style={{ color: j.ok ? "var(--vert)" : "var(--rouge)" }}>{j.ok ? "Envoyé" : "Échec"}</b> · {j.template}</span>
+              <span><b style={{ color: (LIVRAISON[j.statut ?? (j.ok ? "sent" : "failed")] ?? LIVRAISON.sent).couleur }}>{(LIVRAISON[j.statut ?? (j.ok ? "sent" : "failed")] ?? LIVRAISON.sent).label}</b> · {j.template}</span>
               <span style={{ color: "var(--gris)" }}>{dateCourte(j.created_at)}</span>
             </div>
+            {(() => { const p = j.profiles as unknown as { first_name: string | null; last_name: string | null; phone: string | null } | null; return p ? <div style={{ color: "var(--gris)" }}>{[p.first_name, p.last_name].filter(Boolean).join(" ")} · {p.phone}</div> : null; })()}
+            {j.statut_erreur && <div style={{ color: "var(--rouge)", wordBreak: "break-word" }}>{j.statut_erreur}</div>}
             {j.error && <div style={{ color: "var(--gris)", wordBreak: "break-word" }}>{j.error}</div>}
           </div>
         ))}
