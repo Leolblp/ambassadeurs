@@ -67,5 +67,13 @@ export async function GET(request: NextRequest) {
     if (users.length < 1000) break;
   }
 
-  return NextResponse.json({ verifies: data?.length ?? 0, supprimes, inactifs });
+  // Inscriptions carte jamais vérifiées depuis 7 jours : compte supprimé (données personnelles non conservées)
+  const { data: enAttente } = await admin.from("profiles").select("id").eq("status", "pending").eq("kind", "fidelite")
+    .lt("created_at", new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString()).limit(500);
+  let comptes = 0;
+  for (const p of enAttente ?? []) { if (!(await admin.auth.admin.deleteUser(p.id)).error) comptes++; }
+  // Journal des envois de codes : 30 jours
+  await admin.from("otp_requests").delete().lt("created_at", new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString());
+
+  return NextResponse.json({ verifies: data?.length ?? 0, supprimes, inactifs, comptes });
 }

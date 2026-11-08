@@ -3,35 +3,44 @@
 import { revalidatePath } from "next/cache";
 import { createClient, getUserId } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { telInternational } from "@/lib/whatsapp";
+import { age } from "@/lib/fidelite";
 
 export type EtatWhatsApp = { ok: boolean; message: string } | null;
 
-export async function reglerWhatsApp(_: EtatWhatsApp, f: FormData): Promise<EtatWhatsApp> {
+/** Identifiant du membre connecté, seulement si son compte est actif. */
+async function membreActif() {
   const uid = await getUserId(await createClient());
+  if (!uid) return null;
+  const { data } = await createAdminClient().from("profiles").select("status").eq("id", uid).maybeSingle();
+  return data?.status === "active" ? uid : null;
+}
+
+export async function reglerWhatsApp(_: EtatWhatsApp, f: FormData): Promise<EtatWhatsApp> {
+  const uid = await membreActif();
   if (!uid) return { ok: false, message: "Session expirée, reconnecte-toi." };
-  const tel = String(f.get("tel") ?? "").trim();
   const optin = f.get("whatsapp") === "on";
-  if (optin && !telInternational(tel)) return { ok: false, message: "Numéro invalide. Exemple : 06 12 34 56 78." };
-  const { error } = await createAdminClient().from("profiles").update({ phone: tel || null, whatsapp_optin: optin }).eq("id", uid);
+  // Le numéro sert à se connecter : il ne se change pas ici (changement via l'équipe)
+  const { error } = await createAdminClient().from("profiles").update({ whatsapp_optin: optin }).eq("id", uid);
   revalidatePath("/ambassadeurs/carte");
   return error ? { ok: false, message: "Enregistrement impossible, réessaie." } : { ok: true, message: optin ? "Notifications WhatsApp activées." : "Notifications WhatsApp désactivées." };
 }
 
 /** Date de naissance : enregistrée une seule fois (elle débloque la surprise d'anniversaire). */
 export async function enregistrerNaissance(_: EtatWhatsApp, f: FormData): Promise<EtatWhatsApp> {
-  const uid = await getUserId(await createClient());
+  const uid = await membreActif();
   if (!uid) return { ok: false, message: "Session expirée, reconnecte-toi." };
   const naissance = String(f.get("naissance") ?? "");
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(naissance) || naissance < "1920-01-01" || naissance > new Date().toISOString().slice(0, 10)) return { ok: false, message: "Date invalide." };
-  const { error } = await createAdminClient().from("profiles").update({ birth_date: naissance }).eq("id", uid).is("birth_date", null);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(naissance) || age(naissance) > 100 || age(naissance) < 0) return { ok: false, message: "Date invalide." };
+  if (age(naissance) < 18) return { ok: false, message: "La carte est réservée aux 18 ans et plus." };
+  const { data, error } = await createAdminClient().from("profiles").update({ birth_date: naissance }).eq("id", uid).is("birth_date", null).select("id");
   revalidatePath("/ambassadeurs/carte");
-  return error ? { ok: false, message: "Enregistrement impossible, réessaie." } : { ok: true, message: "Date enregistrée." };
+  if (error) return { ok: false, message: "Enregistrement impossible, réessaie." };
+  return data?.length ? { ok: true, message: "Date enregistrée." } : { ok: false, message: "Ta date de naissance est déjà enregistrée." };
 }
 
 /** Membre carte qui veut devenir ambassadeur : crée une demande d'accès étudiée par l'équipe. */
 export async function demanderAmbassadeur(_: EtatWhatsApp, f: FormData): Promise<EtatWhatsApp> {
-  const uid = await getUserId(await createClient());
+  const uid = await membreActif();
   if (!uid) return { ok: false, message: "Session expirée, reconnecte-toi." };
   const admin = createAdminClient();
   const { data: p } = await admin.from("profiles").select("first_name, last_name, email, phone, whatsapp_optin, kind").eq("id", uid).single();

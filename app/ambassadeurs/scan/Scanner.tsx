@@ -92,7 +92,7 @@ export default function Scanner() {
 
       {!fiche && (
         <form onSubmit={(e) => { e.preventDefault(); if (saisie.trim()) lire(saisie); }} style={{ display: "flex", gap: 8 }}>
-          <input className="champ" value={saisie} onChange={(e) => setSaisie(e.target.value)} placeholder="Ou N° de carte" inputMode="numeric" style={{ flexGrow: 1 }} />
+          <input className="champ" value={saisie} onChange={(e) => setSaisie(e.target.value)} placeholder="Ou N° de carte" aria-label="Numéro de carte" inputMode="numeric" style={{ flexGrow: 1 }} />
           <button className="btn" type="submit" disabled={enCours} style={{ minHeight: 48 }}>OK</button>
         </form>
       )}
@@ -110,6 +110,11 @@ export default function Scanner() {
               {fiche.naissance && <div style={{ fontSize: 13, color: fiche.anniv ? "var(--ambre)" : "var(--gris)", marginTop: 2 }}>{fiche.anniv ? "Mois d'anniversaire · " : "Anniversaire le "}{fiche.naissance}</div>}
             </div>
           </div>
+          {fiche.manuel && (
+            <p role="alert" style={{ margin: 0, padding: "10px 12px", borderRadius: 10, background: "rgba(255,176,32,.12)", color: "var(--ambre)", fontSize: 14, fontWeight: 700 }}>
+              Saisie manuelle : vérifie que le nom correspond à la personne (pièce d&apos;identité).
+            </p>
+          )}
           {BOUTONS.filter((b) => b.a !== "anniv" || fiche.anniv).map((b) => {
             const fait = fiche.deja[b.a];
             return (
@@ -119,7 +124,7 @@ export default function Scanner() {
               </button>
             );
           })}
-          <button type="button" onClick={allumer} style={{ background: "none", border: 0, color: "var(--encre)", fontSize: 15, textDecoration: "underline", cursor: "pointer", padding: 8 }}>Scanner la carte suivante</button>
+          <button type="button" onClick={allumer} style={{ background: "none", border: 0, color: "var(--encre)", fontSize: 15, textDecoration: "underline", cursor: "pointer", minHeight: 48, padding: "0 12px" }}>Scanner la carte suivante</button>
         </section>
       )}
     </div>

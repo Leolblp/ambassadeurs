@@ -50,10 +50,10 @@ export default async function Preuves() {
                       <img src={url} alt={`Preuve de ${nom}`} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
                     </a>
                   )}
-                  {!url && p.link && <a href={p.link} target="_blank" rel="noreferrer" style={{ padding: 16, wordBreak: "break-all" }}>{p.link}</a>}
+                  {!url && p.link && <a href={/^https?:\/\//i.test(p.link) ? p.link : undefined} target="_blank" rel="noreferrer" style={{ padding: 16, wordBreak: "break-all" }}>{p.link}</a>}
                   {!url && !p.link && <span className="label-gris">Aucun fichier</span>}
                 </div>
-                {url && p.link && <a href={p.link} target="_blank" rel="noreferrer" style={{ padding: "10px 16px 0", fontSize: 13, wordBreak: "break-all" }}>Voir la vidéo ↗</a>}
+                {url && p.link && <a href={/^https?:\/\//i.test(p.link) ? p.link : undefined} target="_blank" rel="noreferrer" style={{ padding: "10px 16px 0", fontSize: 13, wordBreak: "break-all" }}>Voir la vidéo ↗</a>}
                 <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 12 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
                     <div>

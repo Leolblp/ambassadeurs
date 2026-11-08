@@ -8,6 +8,7 @@ import { numero as fmtNumero } from "@/lib/format";
 export type Fiche = {
   id: string; nom: string; numero: string; niveau: string; anniv: boolean; naissance: string | null;
   deja: { coupe_file?: string; shot?: string; anniv?: string };
+  manuel?: boolean;
 };
 export type Reponse = { ok: true; fiche: Fiche; message?: string } | { ok: false; message: string };
 
@@ -30,6 +31,7 @@ export async function chercher(texte: string): Promise<Reponse> {
   const t = texte.trim().toUpperCase();
   const m = /^XOXO-(\d+)-([0-9A-F]{8})$/.exec(t);
   let memberId: string | null = null;
+  let manuel = false;
   if (m) {
     const { data: p } = await admin.from("profiles").select("id").eq("member_number", Number(m[1])).maybeSingle();
     if (p) {
@@ -39,14 +41,16 @@ export async function chercher(texte: string): Promise<Reponse> {
   } else if (/^\d{1,6}$/.test(t)) {
     const { data: p } = await admin.from("profiles").select("id").eq("member_number", Number(t)).maybeSingle();
     memberId = p?.id ?? null;
+    manuel = true;
   }
   if (!memberId) return { ok: false, message: "Carte inconnue ou invalide." };
   const f = await fiche(memberId);
-  return f ? { ok: true, fiche: f } : { ok: false, message: "Carte désactivée." };
+  return f ? { ok: true, fiche: { ...f, manuel } } : { ok: false, message: "Carte désactivée." };
 }
 
 export async function valider(memberId: string, avantage: Avantage): Promise<Reponse> {
   const { user } = await requireScan();
+  if (!["coupe_file", "shot", "anniv"].includes(avantage)) return { ok: false, message: "Avantage inconnu." };
   const f = await fiche(memberId);
   if (!f) return { ok: false, message: "Carte désactivée." };
   if (avantage === "anniv" && !f.anniv) return { ok: false, message: "Ce n'est pas son mois d'anniversaire." };

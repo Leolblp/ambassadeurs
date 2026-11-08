@@ -49,8 +49,11 @@ export default async function Carte() {
         <h1 className="serif" style={{ margin: "6px 0 0", fontSize: 34, lineHeight: 1.05 }}>Strictement personnelle.</h1>
       </div>
 
-      <CarteFid nom={nom} numero={numero(profil.member_number)} niveau={ambassadeur ? "Ambassadeur" : "Membre"} depuis={depuis} qr={qr} />
-      <p style={{ alignSelf: "center", margin: "-8px 0 0", fontSize: 12, color: "var(--gris)", textAlign: "center" }}>Montre ce QR à l&apos;entrée et au bar.</p>
+      <CarteFid anim={false} nom={nom} numero={numero(profil.member_number)} niveau={ambassadeur ? "Ambassadeur" : "Membre"} depuis={depuis} />
+      <div style={{ alignSelf: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+        <div className="carte-fid-qr" style={{ width: 220, height: 220, padding: 14, borderRadius: 18 }} role="img" aria-label="QR code de ta carte" dangerouslySetInnerHTML={{ __html: qr }} />
+        <p style={{ margin: 0, fontSize: 13, color: "var(--gris)", textAlign: "center" }}>Montre ce QR à l&apos;entrée et au bar. Monte la luminosité.</p>
+      </div>
 
       <section style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         <h2 className="label" style={{ margin: 0 }}>Tes avantages ce soir</h2>
@@ -130,7 +133,7 @@ export default async function Carte() {
         )}
       </section>}
 
-      <ReglageWhatsApp tel={profil.phone ?? null} optin={!!profil.whatsapp_optin} />
+      <ReglageWhatsApp fidelite={!ambassadeur} tel={profil.phone ?? null} optin={!!profil.whatsapp_optin} />
 
       {(profil.role === "admin" || (profil.role as string) === "staff") && (
         <a href="/ambassadeurs/scan" className="btn" style={{ alignSelf: "center" }}>Scanner les cartes</a>

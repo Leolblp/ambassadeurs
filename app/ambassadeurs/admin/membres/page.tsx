@@ -35,8 +35,8 @@ export default async function Membres({ searchParams }: { searchParams: Promise<
         <p className="label" style={{ margin: 0 }}>Membres</p>
         <h1 className="serif" style={{ margin: "6px 0 0", fontSize: 40, lineHeight: 1 }}>{carte ? `${nbCarte ?? 0} cartes actives` : `${nbAmb ?? 0} ambassadeurs`}</h1>
         <nav style={{ display: "flex", gap: 8, marginTop: 14, flexWrap: "wrap" }}>
-          <Link href="/ambassadeurs/admin/membres" className="btn" style={{ minHeight: 40, opacity: carte ? 0.5 : 1 }}>Ambassadeurs · {nbAmb ?? 0}</Link>
-          <Link href="/ambassadeurs/admin/membres?vue=carte" className="btn" style={{ minHeight: 40, opacity: carte ? 1 : 0.5 }}>Cartes fidélité · {nbCarte ?? 0}</Link>
+          <Link href="/ambassadeurs/admin/membres" className="btn" style={{ minHeight: 44, opacity: carte ? 0.5 : 1 }}>Ambassadeurs · {nbAmb ?? 0}</Link>
+          <Link href="/ambassadeurs/admin/membres?vue=carte" className="btn" style={{ minHeight: 44, opacity: carte ? 1 : 0.5 }}>Cartes fidélité · {nbCarte ?? 0}</Link>
         </nav>
         <form style={{ display: "flex", gap: 8, marginTop: 12 }}>
           {carte && <input type="hidden" name="vue" value="carte" />}

@@ -2,18 +2,25 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import CarteFid from "../_components/CarteFid";
 import { inscrire, renvoyer, valider, type EtatInscription } from "./actions";
 
 export default function Inscription() {
   const [etat, envoyer, enCours] = useActionState<EtatInscription, FormData>(inscrire, null);
   const [etatCode, verifier, verif] = useActionState<EtatInscription, FormData>(valider, null);
-  const [, relancer, relance] = useActionState<EtatInscription, FormData>(renvoyer, null);
+  const [etatRelance, relancer, relance] = useActionState<EtatInscription, FormData>(renvoyer, null);
 
-  const surCode = (etatCode ?? etat)?.etape === "code" && etatCode?.etape !== "form";
-  const tel = etatCode?.tel ?? etat?.tel ?? "";
-  const erreurForm = etatCode?.etape === "form" ? etatCode.erreur : etat?.erreur;
+  // L'étape affichée suit la dernière réponse reçue, quelle que soit l'action qui l'a produite
+  const [dernier, setDernier] = useState<EtatInscription>(null);
+  useEffect(() => { if (etat) setDernier(etat); }, [etat]);
+  useEffect(() => { if (etatCode) setDernier(etatCode); }, [etatCode]);
+  useEffect(() => { if (etatRelance) setDernier(etatRelance); }, [etatRelance]);
+  const [tel, setTel] = useState("");
+  useEffect(() => { if (dernier?.tel) setTel(dernier.tel); }, [dernier]);
+  const surCode = dernier?.etape === "code";
+  const erreurForm = dernier?.etape === "form" ? dernier.erreur : undefined;
+  const erreurCode = dernier?.etape === "code" ? dernier.erreur : undefined;
 
   return (
     <div className="grain" style={{ minHeight: "100dvh", background: "radial-gradient(90% 60% at 50% 0%, rgba(255, 26, 26, .12), transparent 70%)" }}>
@@ -55,11 +62,15 @@ export default function Inscription() {
             </div>
             <div><label className="champ-label" htmlFor="tel">Téléphone (WhatsApp)</label><input className="champ" id="tel" name="tel" type="tel" autoComplete="tel" required placeholder="06 12 34 56 78" /></div>
             <div><label className="champ-label" htmlFor="email">Email</label><input className="champ" id="email" name="email" type="email" required autoComplete="email" autoCapitalize="none" spellCheck={false} /></div>
-            <div><label className="champ-label" htmlFor="naissance">Date de naissance</label><input className="champ" id="naissance" name="naissance" type="date" required autoComplete="bday" max={new Date().toISOString().slice(0, 10)} /></div>
+            <div><label className="champ-label" htmlFor="naissance">Date de naissance</label><input className="champ" id="naissance" name="naissance" type="date" required autoComplete="bday" /></div>
 
             <label style={{ display: "flex", gap: 10, alignItems: "flex-start", fontSize: 13, lineHeight: 1.45, color: "var(--gris)", cursor: "pointer" }}>
-              <input type="checkbox" name="cgu" required style={{ marginTop: 3, width: 18, height: 18, accentColor: "var(--rouge)", flex: "none" }} />
-              <span>J&apos;ai 18 ans ou plus, j&apos;accepte la <Link href="/ambassadeurs/confidentialite" target="_blank" style={{ color: "var(--encre)" }}>politique de confidentialité</Link> et de recevoir sur WhatsApp mon code de connexion et les infos de La Commerciale (désactivable depuis ma carte).</span>
+              <input type="checkbox" name="cgu" required style={{ marginTop: 1, accentColor: "var(--rouge)" }} />
+              <span>J&apos;ai 18 ans ou plus et j&apos;accepte la <Link href="/ambassadeurs/confidentialite" target="_blank" style={{ color: "var(--encre)" }}>politique de confidentialité</Link>. Mon code de connexion m&apos;est envoyé sur WhatsApp.</span>
+            </label>
+            <label style={{ display: "flex", gap: 10, alignItems: "flex-start", fontSize: 13, lineHeight: 1.45, color: "var(--gris)", cursor: "pointer" }}>
+              <input type="checkbox" name="marketing" defaultChecked={false} style={{ marginTop: 1, accentColor: "var(--rouge)" }} />
+              <span>Je veux recevoir les infos et soirées de La Commerciale sur WhatsApp (facultatif, désactivable depuis ma carte).</span>
             </label>
 
             {erreurForm && <p role="alert" style={{ margin: 0, color: "var(--rouge)", fontSize: 14 }}>{erreurForm}</p>}
@@ -75,7 +86,7 @@ export default function Inscription() {
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           <p style={{ margin: 0, lineHeight: 1.55, color: "var(--gris)" }}>
-            {etat?.deja ? "Tu as déjà une carte avec ce numéro. " : ""}Code envoyé sur WhatsApp au <b style={{ color: "var(--encre)" }}>{tel}</b>.
+            Si ce numéro peut recevoir un code, il arrive sur WhatsApp au <b style={{ color: "var(--encre)" }}>{tel}</b>.
           </p>
           <form action={verifier} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             <input type="hidden" name="tel" value={tel} />
@@ -83,7 +94,7 @@ export default function Inscription() {
               <label className="champ-label" htmlFor="code">Code à 6 chiffres</label>
               <input className="champ" id="code" name="code" inputMode="numeric" autoComplete="one-time-code" pattern="\d{6,8}" maxLength={8} required autoFocus style={{ fontSize: 24, letterSpacing: ".3em", textAlign: "center" }} />
             </div>
-            {etatCode?.erreur && etatCode.etape === "code" && <p role="alert" style={{ margin: 0, color: "var(--rouge)", fontSize: 14 }}>{etatCode.erreur}</p>}
+            {erreurCode && <p role="alert" style={{ margin: 0, color: "var(--rouge)", fontSize: 14 }}>{erreurCode}</p>}
             <button className="btn" type="submit" disabled={verif} style={{ width: "100%" }}>{verif ? "Vérification…" : "Activer ma carte"}</button>
           </form>
           <form action={relancer} style={{ alignSelf: "center" }}>

@@ -7,8 +7,8 @@ export async function requireAdmin() {
   const uid = await getUserId(supabase);
   if (!uid) redirect("/ambassadeurs/connexion");
   const user = { id: uid };
-  const { data: profil } = await supabase.from("profiles").select("role, first_name").eq("id", user.id).single();
-  if (profil?.role !== "admin") redirect("/ambassadeurs");
+  const { data: profil } = await supabase.from("profiles").select("role, first_name, status").eq("id", user.id).single();
+  if (profil?.status !== "active" || profil.role !== "admin") redirect("/ambassadeurs");
   return { supabase, user, profil };
 }
 
@@ -19,9 +19,10 @@ export async function requireStaff() {
   if (!uid) redirect("/ambassadeurs/connexion");
   const user = { id: uid };
   const [{ data: profil }, { data: team }] = await Promise.all([
-    supabase.from("profiles").select("role, first_name").eq("id", user.id).single(),
+    supabase.from("profiles").select("role, first_name, status").eq("id", user.id).single(),
     supabase.from("teams").select("id, name, invite_code, bonus_percent").eq("leader_id", user.id).maybeSingle(),
   ]);
+  if (profil?.status !== "active") redirect("/ambassadeurs");
   const isAdmin = profil?.role === "admin";
   if (!isAdmin && !team) redirect("/ambassadeurs");
   return { supabase, user, isAdmin, team };

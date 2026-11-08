@@ -37,7 +37,9 @@ export async function carteDuMembre(memberId: string) {
   const admin = createAdminClient();
   const { data } = await admin.from("wallet_passes").select("serial, auth_token, updated_at").eq("member_id", memberId).maybeSingle();
   if (data) return data;
-  const { data: cree, error } = await admin.from("wallet_passes").insert({ member_id: memberId }).select("serial, auth_token, updated_at").single();
+  // Deux premières ouvertures simultanées (page + pass) : l'une crée, l'autre relit
+  await admin.from("wallet_passes").upsert({ member_id: memberId }, { onConflict: "member_id", ignoreDuplicates: true });
+  const { data: cree, error } = await admin.from("wallet_passes").select("serial, auth_token, updated_at").eq("member_id", memberId).single();
   if (error) throw error;
   return cree;
 }

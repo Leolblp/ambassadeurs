@@ -32,8 +32,7 @@ export async function getMembre(options: { carte?: boolean } = {}) {
   if (!profil) redirect("/ambassadeurs/connexion");
   // Compte suspendu ou créé hors demande d'accès : pas d'accès membre
   if ((profil as Profil & { status?: string }).status !== "active") {
-    await supabase.auth.signOut();
-    redirect("/ambassadeurs/connexion");
+    redirect("/ambassadeurs/auth/sortie");
   }
 
   // Carte fidélité seule : pas d'accès aux pages ambassadeur

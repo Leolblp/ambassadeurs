@@ -1,7 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { headers } from "next/headers";
+import { pousserCarte } from "@/lib/wallet";
+import { majGoogle } from "@/lib/wallet/google";
 import { requireAdmin, requireStaff, codeDepuisPrenom, codeEquipe } from "@/lib/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { after } from "next/server";
@@ -69,8 +70,11 @@ export async function accepterDemande(id: string): Promise<Resultat> {
   }
 
   // 0. Déjà membre avec la carte fidélité : il passe ambassadeur, même compte
-  const { data: carte } = await admin.from("profiles").select("id, kind").eq("email", String(d.email).toLowerCase()).maybeSingle();
-  if (carte?.kind === "fidelite") {
+  const { data: carte } = await admin.from("profiles").select("id, kind, status, phone").eq("email", String(d.email).toLowerCase()).maybeSingle();
+  if (carte && carte.kind === "fidelite") {
+    // Seul un compte carte actif, au même numéro que la demande, peut passer ambassadeur
+    if (carte.status !== "active" || telInternational(carte.phone) !== telInternational(d.phone))
+      return { ok: false, message: "Un compte carte existe avec cet email mais il n'est pas vérifié ou son numéro diffère de la demande. Refuse ou contacte la personne." };
     const base0 = codeDepuisPrenom(d.first_name);
     let code0 = base0;
     for (let i = 2; i < 50; i++) {
@@ -78,7 +82,8 @@ export async function accepterDemande(id: string): Promise<Resultat> {
       if (!pris) break;
       code0 = base0.replace(/XOXO$/, `${i}XOXO`);
     }
-    await admin.from("profiles").update({ kind: "ambassadeur", promo_code: code0, team_id: d.team_id ?? null, instagram: d.instagram ?? null, status: "active" }).eq("id", carte.id);
+    await admin.from("profiles").update({ kind: "ambassadeur", promo_code: code0, team_id: d.team_id ?? null, instagram: d.instagram ?? null }).eq("id", carte.id);
+    after(async () => { await pousserCarte(carte.id).catch(() => {}); await majGoogle(carte.id).catch(() => {}); });
     await supabase.from("access_requests").update({ status: "accepted", reviewed_by: user.id, reviewed_at: new Date().toISOString() }).eq("id", id);
     revalidatePath("/ambassadeurs/admin/demandes");
     return { ok: true, message: `${d.first_name} avait déjà la carte : passé ambassadeur, code ${code0}. Il le voit à sa prochaine connexion.` };
@@ -87,8 +92,7 @@ export async function accepterDemande(id: string): Promise<Resultat> {
   // 1. Création du compte (le profil est créé automatiquement).
   //    Avec WhatsApp : compte créé sans email, le lien d'activation part sur WhatsApp.
   //    Sans WhatsApp : invitation classique par email.
-  const h = await headers();
-  const origine = h.get("host") ? `https://${h.get("host")}` : process.env.NEXT_PUBLIC_SITE_URL;
+  const origine = process.env.NEXT_PUBLIC_SITE_URL || "https://lacom.club";
   const metadata = { first_name: d.first_name, last_name: d.last_name, phone: d.phone, instagram: d.instagram };
   const parWhatsApp = !!(d.whatsapp_optin && telInternational(d.phone) && process.env.WHATSAPP_TOKEN);
   const { data: cree, error: errCreation } = parWhatsApp
@@ -270,15 +274,19 @@ export async function ajusterPoints(_: Resultat, f: FormData): Promise<Resultat>
 }
 
 export async function changerStatutMembre(id: string, statut: "active" | "suspended"): Promise<Resultat> {
-  const { supabase } = await requireAdmin();
+  const { supabase, user } = await requireAdmin();
+  if (id === user.id) return { ok: false, message: "Tu ne peux pas te suspendre toi-même." };
   const { error } = await supabase.from("profiles").update({ status: statut }).eq("id", id);
+  // Suspension : compte banni côté Auth, ses sessions ne peuvent plus être rafraîchies (levé à la réactivation)
+  if (!error) await createAdminClient().auth.admin.updateUserById(id, { ban_duration: statut === "suspended" ? "876000h" : "none" }).catch(() => {});
   revalidatePath("/ambassadeurs/admin/membres");
   return error ? { ok: false, message: error.message } : { ok: true, message: statut === "active" ? "Membre réactivé." : "Membre suspendu." };
 }
 
 export async function changerRole(id: string, role: "member" | "staff" | "admin"): Promise<Resultat> {
   const { supabase, user } = await requireAdmin();
-  if (id === user.id && role === "member") return { ok: false, message: "Tu ne peux pas retirer ton propre accès admin." };
+  if (!["member", "staff", "admin"].includes(role)) return { ok: false, message: "Rôle invalide." };
+  if (id === user.id && role !== "admin") return { ok: false, message: "Tu ne peux pas retirer ton propre accès admin." };
   const { error } = await supabase.from("profiles").update({ role }).eq("id", id);
   revalidatePath("/ambassadeurs/admin/membres");
   return error ? { ok: false, message: error.message } : { ok: true, message: role === "admin" ? "Accès admin donné." : role === "staff" ? "Accès scan donné." : "Accès retiré." };
