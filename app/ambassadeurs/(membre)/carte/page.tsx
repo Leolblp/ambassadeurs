@@ -50,6 +50,20 @@ export default async function Carte() {
       </div>
 
       <CarteFid anim={false} nom={nom} numero={numero(profil.member_number)} niveau={ambassadeur ? "Ambassadeur" : "Membre"} depuis={depuis} />
+      <div style={{ alignSelf: "center", display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center" }}>
+        {!android && (
+          <a href="/api/wallet/pass" style={styleWallet}>
+            <svg width="22" height="18" viewBox="0 0 22 18" aria-hidden="true"><rect x="1" y="1" width="20" height="16" rx="3" fill="none" stroke="#fff" strokeWidth="1.6" /><path d="M1 6h20M1 10h20" stroke="#ff1a1a" strokeWidth="1.6" /></svg>
+            Ajouter à Apple Wallet
+          </a>
+        )}
+        {!iphone && (
+          <a href="/api/wallet/google" style={styleWallet}>
+            <svg width="22" height="18" viewBox="0 0 22 18" aria-hidden="true"><rect x="1" y="1" width="20" height="16" rx="3" fill="none" stroke="#fff" strokeWidth="1.6" /><path d="M1 6h20M1 10h20" stroke="#ff1a1a" strokeWidth="1.6" /></svg>
+            Ajouter à Google Wallet
+          </a>
+        )}
+      </div>
       <div style={{ alignSelf: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
         <div className="carte-fid-qr" style={{ width: 220, height: 220, padding: 14, borderRadius: 18 }} role="img" aria-label="QR code de ta carte" dangerouslySetInnerHTML={{ __html: qr }} />
         <p style={{ margin: 0, fontSize: 13, color: "var(--gris)", textAlign: "center" }}>Montre ce QR à l&apos;entrée et au bar. Monte la luminosité.</p>
@@ -75,21 +89,6 @@ export default async function Carte() {
       </section>
 
       {!profil.birth_date && <Naissance />}
-
-      <div style={{ alignSelf: "center", display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center" }}>
-        {!android && (
-          <a href="/api/wallet/pass" style={styleWallet}>
-            <svg width="22" height="18" viewBox="0 0 22 18" aria-hidden="true"><rect x="1" y="1" width="20" height="16" rx="3" fill="none" stroke="#fff" strokeWidth="1.6" /><path d="M1 6h20M1 10h20" stroke="#ff1a1a" strokeWidth="1.6" /></svg>
-            Ajouter à Apple Wallet
-          </a>
-        )}
-        {!iphone && (
-          <a href="/api/wallet/google" style={styleWallet}>
-            <svg width="22" height="18" viewBox="0 0 22 18" aria-hidden="true"><rect x="1" y="1" width="20" height="16" rx="3" fill="none" stroke="#fff" strokeWidth="1.6" /><path d="M1 6h20M1 10h20" stroke="#ff1a1a" strokeWidth="1.6" /></svg>
-            Ajouter à Google Wallet
-          </a>
-        )}
-      </div>
 
       {profil.promo_code && (
         <section style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, padding: "14px 16px", border: "1px dashed var(--bord-rouge)", borderRadius: 14 }}>
