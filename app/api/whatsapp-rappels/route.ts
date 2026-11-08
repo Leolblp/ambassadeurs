@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
   const [{ data: missions }, { data: membres }] = await Promise.all([
     admin.from("missions").select("id, title, deadline").eq("is_active", true).neq("proof_type", "tickets")
       .gt("deadline", maintenant.toISOString()).lte("deadline", horizon.toISOString()),
-    admin.from("profiles").select("id, first_name, phone, whatsapp_optin, team_id").eq("status", "active"),
+    admin.from("profiles").select("id, first_name, phone, whatsapp_optin, team_id").eq("status", "active").eq("kind", "ambassadeur"),
   ]);
 
   let rappels = 0;

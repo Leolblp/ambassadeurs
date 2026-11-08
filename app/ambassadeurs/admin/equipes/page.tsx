@@ -7,7 +7,7 @@ export default async function Equipes() {
   const { supabase } = await requireAdmin();
   const [{ data: equipes }, { data: membres }, { data: classement }] = await Promise.all([
     supabase.from("teams").select("*").order("created_at"),
-    supabase.from("profiles").select("id, first_name, last_name, member_number, team_id").eq("status", "active").order("first_name"),
+    supabase.from("profiles").select("id, first_name, last_name, member_number, team_id").eq("status", "active").eq("kind", "ambassadeur").order("first_name"),
     supabase.rpc("leaderboard_teams_month"),
   ]);
   const stats = new Map(((classement ?? []) as { team_id: string; members: number; points: number; rank: number }[]).map((c) => [c.team_id, c]));

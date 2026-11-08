@@ -87,7 +87,9 @@ async function objet(memberId: string) {
   const textes = [
     ...(d.code ? [{ id: "code", header: "Code membre", body: d.code }] : []),
     ...(d.team ? [{ id: "team", header: "Team", body: d.team }] : []),
-    { id: "prochain", header: d.prochain ? "Prochain privilège" : "Privilèges", body: d.prochain ? `${d.prochain.name} · encore ${d.prochain.reste} pts` : "Tous accessibles" },
+    { id: "avantages", header: "Chaque soirée", body: "Coupe-file · 1 shot offert" },
+    { id: "anniv", header: "Surprise d'anniversaire", body: d.anniv },
+    ...(d.ambassadeur ? [{ id: "prochain", header: d.prochain ? "Prochain privilège" : "Privilèges", body: d.prochain ? `${d.prochain.name} · encore ${d.prochain.reste} pts` : "Tous accessibles" }] : []),
     ...(d.soiree ? [{ id: "soiree", header: " ", body: d.soiree }] : []),
   ];
   return {
@@ -96,7 +98,7 @@ async function objet(memberId: string) {
     state: "ACTIVE",
     accountId: d.numero,
     accountName: d.nom,
-    loyaltyPoints: { label: "Points", balance: { int: d.points } },
+    ...(d.ambassadeur ? { loyaltyPoints: { label: "Points", balance: { int: d.points } } } : {}),
     barcode: { type: "QR_CODE", value: d.qr, alternateText: `N° ${d.numero}` },
     textModulesData: textes,
     linksModuleData: { uris: [{ uri: `${SITE}/ambassadeurs`, description: "Ouvrir mon espace", id: "espace" }] },

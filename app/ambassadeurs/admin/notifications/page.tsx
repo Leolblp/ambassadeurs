@@ -13,7 +13,7 @@ export default async function Notifications() {
     supabase.from("teams").select("id, name").order("name"),
     admin.from("wallet_registrations").select("serial"),
     admin.from("wallet_passes").select("member_id, serial, google"),
-    admin.from("profiles").select("id, first_name, last_name, member_number, team_id").eq("status", "active").order("first_name"),
+    admin.from("profiles").select("id, first_name, last_name, member_number, team_id").eq("status", "active").eq("kind", "ambassadeur").order("first_name"),
     admin.from("points_ledger").select("member_id, delta"),
   ]);
   const seriesApple = new Set((regs ?? []).map((r) => r.serial));

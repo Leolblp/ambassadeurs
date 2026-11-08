@@ -50,7 +50,7 @@ export async function donneesCarte(memberId: string) {
   const admin = createAdminClient();
   const [carte, { data: p }, { data: solde }, { data: privileges }, { data: soiree }] = await Promise.all([
     carteDuMembre(memberId),
-    admin.from("profiles").select("first_name, last_name, member_number, promo_code, created_at, team_id, teams!profiles_team_id_fkey(name)").eq("id", memberId).single(),
+    admin.from("profiles").select("first_name, last_name, member_number, promo_code, created_at, team_id, kind, birth_date, teams!profiles_team_id_fkey(name)").eq("id", memberId).single(),
     admin.from("points_ledger").select("delta").eq("member_id", memberId).then((r) => ({ data: (r.data ?? []).reduce((t, l) => t + Number(l.delta), 0) })),
     admin.from("privileges").select("name, cost").eq("is_active", true).order("cost"),
     admin.from("events").select("name, starts_at").gte("starts_at", new Date(Date.now() - 8 * 3600 * 1000).toISOString()).order("starts_at").limit(1).maybeSingle(),
@@ -71,6 +71,8 @@ export async function donneesCarte(memberId: string) {
     serial: carte.serial as string,
     auth_token: carte.auth_token as string,
     nom: [p.first_name, p.last_name].filter(Boolean).join(" ") || "Membre",
+    ambassadeur: p.kind !== "fidelite",
+    anniv: p.birth_date ? `En ${["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"][Number(String(p.birth_date).slice(5, 7)) - 1]}` : "Ajoute ta date de naissance",
     numero,
     code: p.promo_code as string | null,
     team: (p.teams as unknown as { name: string } | null)?.name ?? null,
@@ -113,7 +115,7 @@ export async function genererPass(memberId: string): Promise<Buffer> {
     authenticationToken: carte.auth_token,
     webServiceURL: `${SITE}/api/wallet`,
     organizationName: "La Commerciale",
-    description: "Carte membre XOXO Club",
+    description: "Carte La Commerciale · XOXO Club",
     logoText: "XOXO CLUB",
     backgroundColor: "rgb(12, 7, 7)",
     foregroundColor: "rgb(245, 235, 235)",
@@ -122,8 +124,10 @@ export async function genererPass(memberId: string): Promise<Buffer> {
     locations: [{ ...LIEU, relevantText: ceSoir ? `Ce soir : ${soiree!.name}. Présente ta carte XOXO Club.` : "Bienvenue à La Commerciale. Présente ta carte XOXO Club." }],
     ...(ouverture && fin ? { relevantDate: ouverture.toISOString(), relevantDates: [{ startDate: ouverture.toISOString(), endDate: fin.toISOString() }] } : {}),
     storeCard: {
-      headerFields: [{ key: "points", label: "POINTS", value: points, changeMessage: "Ton solde XOXO Club : %@ points" }],
-      primaryFields: [{ key: "nom", label: "MEMBRE", value: nom }],
+      headerFields: d.ambassadeur
+        ? [{ key: "points", label: "POINTS", value: points, changeMessage: "Ton solde XOXO Club : %@ points" }]
+        : [{ key: "carte", label: "CARTE", value: "MEMBRE" }],
+      primaryFields: [{ key: "nom", label: d.ambassadeur ? "AMBASSADEUR" : "MEMBRE", value: nom }],
       secondaryFields: [
         { key: "numero", label: "N°", value: numero },
         ...(p.promo_code ? [{ key: "code", label: "CODE MEMBRE", value: p.promo_code }] : []),
@@ -131,14 +135,18 @@ export async function genererPass(memberId: string): Promise<Buffer> {
       auxiliaryFields: [
         ...(champSoiree ? [champSoiree] : []),
         ...(team ? [{ key: "team", label: "TEAM", value: team }] : []),
-        prochain
-          ? { key: "prochain", label: "PROCHAIN PRIVILÈGE", value: `${prochain.name} · encore ${prochain.reste} pts` }
-          : { key: "prochain", label: "PRIVILÈGES", value: "Tous accessibles" },
+        ...(d.ambassadeur
+          ? [prochain
+              ? { key: "prochain", label: "PROCHAIN PRIVILÈGE", value: `${prochain.name} · encore ${prochain.reste} pts` }
+              : { key: "prochain", label: "PRIVILÈGES", value: "Tous accessibles" }]
+          : [{ key: "avantages", label: "CHAQUE SOIRÉE", value: "Coupe-file · 1 shot" }]),
       ],
       backFields: [
         ...(d.annonce ? [{ key: "annonce", label: "Message du club", value: d.annonce.texte, changeMessage: "%@" }] : []),
         { key: "espace", label: "Ton espace membre", value: `${SITE}/ambassadeurs`, attributedValue: `<a href="${SITE}/ambassadeurs">Ouvrir mon espace</a>` },
-        { key: "usage", label: "Comment l'utiliser", value: "Présente cette carte à l'équipe de La Commerciale pour profiter de tes privilèges. Ton solde se met à jour automatiquement." },
+        { key: "avantages-detail", label: "Tes avantages", value: "Coupe-file et 1 shot offert à chaque soirée. Une surprise pendant ton mois d'anniversaire." },
+        { key: "anniv", label: "Ton anniversaire", value: d.anniv },
+        { key: "usage", label: "Comment l'utiliser", value: "Présente le QR de cette carte à l'entrée et au bar de La Commerciale." },
         { key: "depuis", label: "Membre depuis", value: new Date(p.created_at).toLocaleDateString("fr-FR", { month: "long", year: "numeric" }) },
         { key: "perso", label: "Strictement personnelle", value: "Cette carte est nominative et ne peut pas être partagée." },
       ],

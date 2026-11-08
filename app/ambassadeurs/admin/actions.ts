@@ -68,6 +68,22 @@ export async function accepterDemande(id: string): Promise<Resultat> {
     return { ok: false, message: "Clé secrète Supabase absente sur Vercel (SUPABASE_SECRET_KEY)." };
   }
 
+  // 0. Déjà membre avec la carte fidélité : il passe ambassadeur, même compte
+  const { data: carte } = await admin.from("profiles").select("id, kind").eq("email", String(d.email).toLowerCase()).maybeSingle();
+  if (carte?.kind === "fidelite") {
+    const base0 = codeDepuisPrenom(d.first_name);
+    let code0 = base0;
+    for (let i = 2; i < 50; i++) {
+      const { data: pris } = await admin.from("profiles").select("id").eq("promo_code", code0).maybeSingle();
+      if (!pris) break;
+      code0 = base0.replace(/XOXO$/, `${i}XOXO`);
+    }
+    await admin.from("profiles").update({ kind: "ambassadeur", promo_code: code0, team_id: d.team_id ?? null, instagram: d.instagram ?? null, status: "active" }).eq("id", carte.id);
+    await supabase.from("access_requests").update({ status: "accepted", reviewed_by: user.id, reviewed_at: new Date().toISOString() }).eq("id", id);
+    revalidatePath("/ambassadeurs/admin/demandes");
+    return { ok: true, message: `${d.first_name} avait déjà la carte : passé ambassadeur, code ${code0}. Il le voit à sa prochaine connexion.` };
+  }
+
   // 1. Création du compte (le profil est créé automatiquement).
   //    Avec WhatsApp : compte créé sans email, le lien d'activation part sur WhatsApp.
   //    Sans WhatsApp : invitation classique par email.
@@ -188,7 +204,7 @@ export async function annoncerMission(id: string): Promise<Resultat> {
   if (m.notified_at) return { ok: false, message: "Déjà annoncée sur WhatsApp." };
   if (!process.env.WHATSAPP_TOKEN) return { ok: false, message: "WhatsApp n'est pas configuré (WHATSAPP_TOKEN absent sur Vercel)." };
   const admin = createAdminClient();
-  const { data: membres } = await admin.from("profiles").select("id, first_name, phone, whatsapp_optin").eq("status", "active").eq("whatsapp_optin", true).not("phone", "is", null);
+  const { data: membres } = await admin.from("profiles").select("id, first_name, phone, whatsapp_optin").eq("status", "active").eq("kind", "ambassadeur").eq("whatsapp_optin", true).not("phone", "is", null);
   await supabase.from("missions").update({ notified_at: new Date().toISOString() }).eq("id", id);
   const liste = membres ?? [];
   after(async () => {
@@ -260,12 +276,12 @@ export async function changerStatutMembre(id: string, statut: "active" | "suspen
   return error ? { ok: false, message: error.message } : { ok: true, message: statut === "active" ? "Membre réactivé." : "Membre suspendu." };
 }
 
-export async function changerRole(id: string, role: "member" | "admin"): Promise<Resultat> {
+export async function changerRole(id: string, role: "member" | "staff" | "admin"): Promise<Resultat> {
   const { supabase, user } = await requireAdmin();
   if (id === user.id && role === "member") return { ok: false, message: "Tu ne peux pas retirer ton propre accès admin." };
   const { error } = await supabase.from("profiles").update({ role }).eq("id", id);
   revalidatePath("/ambassadeurs/admin/membres");
-  return error ? { ok: false, message: error.message } : { ok: true, message: role === "admin" ? "Accès admin donné." : "Accès admin retiré." };
+  return error ? { ok: false, message: error.message } : { ok: true, message: role === "admin" ? "Accès admin donné." : role === "staff" ? "Accès scan donné." : "Accès retiré." };
 }
 
 /* ---------- Privilèges ---------- */
@@ -397,7 +413,7 @@ export async function envoyerAnnonce(_: Resultat, f: FormData): Promise<Resultat
     const min = txt(f, "min") === "" ? -Infinity : Number(txt(f, "min"));
     const max = txt(f, "max") === "" ? Infinity : Number(txt(f, "max"));
     const [{ data: actifs }, { data: lignes }] = await Promise.all([
-      admin.from("profiles").select("id").eq("status", "active"),
+      admin.from("profiles").select("id").eq("status", "active").eq("kind", "ambassadeur"),
       admin.from("points_ledger").select("member_id, delta"),
     ]);
     const soldes = new Map<string, number>();

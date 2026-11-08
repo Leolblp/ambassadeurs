@@ -1,13 +1,18 @@
-import Image from "next/image";
+import CarteFid from "@/app/_components/CarteFid";
+import { donneesCarte } from "@/lib/wallet";
+import { qrSvg } from "@/lib/qr";
+import { AVANTAGES, MOIS, moisAnniv, soireeDuJour, utilisations } from "@/lib/fidelite";
 import { headers } from "next/headers";
 import { getMembre, numero, pts, RAISON } from "@/lib/membre";
 import Copier from "../../_components/Copier";
 import Deconnexion from "./Deconnexion";
 import ReglageWhatsApp from "./ReglageWhatsApp";
+import Naissance from "./Naissance";
 import { LienCookies } from "@/app/_components/Consentement";
 
 export default async function Carte() {
-  const { supabase, user, profil, solde } = await getMembre();
+  const { supabase, user, profil, solde } = await getMembre({ carte: true });
+  const ambassadeur = profil.kind !== "fidelite";
   const { data: historique } = await supabase
     .from("points_ledger")
     .select("id, delta, reason, note, created_at")
@@ -21,6 +26,22 @@ export default async function Carte() {
   const depuis = new Date(profil.created_at).toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
   const nom = [profil.first_name, profil.last_name].filter(Boolean).join(" ") || "Membre";
 
+  const soiree = soireeDuJour();
+  const [carte, deja] = await Promise.all([donneesCarte(user.id), utilisations(user.id, soiree)]);
+  const qr = await qrSvg(carte.qr);
+  const anniv = moisAnniv(profil.birth_date, soiree);
+  const moisNaissance = profil.birth_date ? MOIS[Number(profil.birth_date.slice(5, 7)) - 1] : null;
+  const heure = (iso: string) => new Date(iso).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris" });
+  const lignesAvantages = [
+    { cle: "coupe_file", titre: AVANTAGES.coupe_file.titre, icone: "M5 12h14M13 6l6 6-6 6", etat: deja.coupe_file ? "utilise" : "dispo", texte: deja.coupe_file ? `Utilisé ce soir à ${heure(deja.coupe_file)}` : AVANTAGES.coupe_file.detail },
+    { cle: "shot", titre: AVANTAGES.shot.titre, icone: "M6 3h12l-2 18H8z M7 8h10", etat: deja.shot ? "utilise" : "dispo", texte: deja.shot ? `Servi ce soir à ${heure(deja.shot)}` : AVANTAGES.shot.detail },
+    {
+      cle: "anniv", titre: AVANTAGES.anniv.titre, icone: "M20 12v9H4v-9 M2 7h20v5H2z M12 21V7 M12 7c-2-4-6-4-6-1s6 1 6 1 6 2 6-1-4-3-6 1",
+      etat: deja.anniv ? "utilise" : anniv ? "dispo" : "attente",
+      texte: deja.anniv ? "Déjà profitée cette année" : anniv ? "C'est ton mois : demande ta surprise au bar" : moisNaissance ? `Disponible en ${moisNaissance}` : AVANTAGES.anniv.detail,
+    },
+  ];
+
   return (
     <div className="ecran grain" style={{ gap: 20, minHeight: "auto" }}>
       <div>
@@ -28,22 +49,29 @@ export default async function Carte() {
         <h1 className="serif" style={{ margin: "6px 0 0", fontSize: 34, lineHeight: 1.05 }}>Strictement personnelle.</h1>
       </div>
 
-      <div style={{ alignSelf: "center", width: "min(340px, 100%)", aspectRatio: "1.586", borderRadius: 18, padding: "20px 22px", background: "var(--carte)", border: "1px solid var(--bord-rouge)", boxShadow: "0 30px 60px rgba(0,0,0,.6)", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-          <Image src="/logo-xoxo.png" alt="XOXO Club" width={96} height={57} />
-          <div className="label-gris" style={{ textAlign: "right" }}>
-            Membre<br />
-            <span className="display" style={{ fontSize: 26, letterSpacing: ".04em", color: "var(--encre)" }}>N° {numero(profil.member_number)}</span>
+      <CarteFid nom={nom} numero={numero(profil.member_number)} niveau={ambassadeur ? "Ambassadeur" : "Membre"} depuis={depuis} qr={qr} />
+      <p style={{ alignSelf: "center", margin: "-8px 0 0", fontSize: 12, color: "var(--gris)", textAlign: "center" }}>Montre ce QR à l&apos;entrée et au bar.</p>
+
+      <section style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <h2 className="label" style={{ margin: 0 }}>Tes avantages ce soir</h2>
+        {lignesAvantages.map((a) => (
+          <div key={a.cle} className="avantage" data-etat={a.etat}>
+            <span className="avantage-pastille" aria-hidden="true">
+              {a.etat === "utilise" ? (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12l5 5 9-10" /></svg>
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d={a.icone} /></svg>
+              )}
+            </span>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 15, fontWeight: 700 }}>{a.titre}</div>
+              <div style={{ fontSize: 12, color: "var(--gris)", marginTop: 2 }}>{a.texte}</div>
+            </div>
           </div>
-        </div>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 8 }}>
-          <div style={{ minWidth: 0 }}>
-            <div className="display" style={{ fontSize: 22, textTransform: "uppercase", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{nom}</div>
-            <div style={{ fontSize: 11, color: "var(--gris)", marginTop: 2 }}>Membre depuis {depuis}</div>
-          </div>
-          <div className="label" style={{ fontSize: 11 }}>La Commerciale</div>
-        </div>
-      </div>
+        ))}
+      </section>
+
+      {!profil.birth_date && <Naissance />}
 
       <div style={{ alignSelf: "center", display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center" }}>
         {!android && (
@@ -70,7 +98,17 @@ export default async function Carte() {
         </section>
       )}
 
-      <section style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      {!ambassadeur && (
+        <a href="/ambassadeurs/carte/ambassadeur" className="carte" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, padding: "16px 18px", borderRadius: 14, border: "1px dashed var(--bord-rouge)", textDecoration: "none" }}>
+          <div>
+            <div className="label">Programme ambassadeur</div>
+            <div style={{ fontSize: 14, marginTop: 4, color: "var(--gris)" }}>Fais venir ton monde, gagne des points et des privilèges.</div>
+          </div>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+        </a>
+      )}
+
+      {ambassadeur && <section style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
           <h2 className="label" style={{ margin: 0 }}>Historique des points</h2>
           <span style={{ fontSize: 13, fontWeight: 700 }}>{pts(solde)} pts</span>
@@ -90,10 +128,13 @@ export default async function Carte() {
             </div>
           ))
         )}
-      </section>
+      </section>}
 
       <ReglageWhatsApp tel={profil.phone ?? null} optin={!!profil.whatsapp_optin} />
 
+      {(profil.role === "admin" || (profil.role as string) === "staff") && (
+        <a href="/ambassadeurs/scan" className="btn" style={{ alignSelf: "center" }}>Scanner les cartes</a>
+      )}
       {profil.role === "admin" && (
         <a href="/ambassadeurs/admin" className="btn" style={{ alignSelf: "center" }}>Back-office équipe</a>
       )}

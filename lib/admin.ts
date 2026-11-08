@@ -43,3 +43,13 @@ export function codeDepuisPrenom(prenom: string) {
     .slice(0, 10) || "MEMBRE";
   return `${base}XOXO`;
 }
+
+/** Équipe de la porte et du bar (rôle staff) ou admin : accès à la page scan uniquement. */
+export async function requireScan() {
+  const supabase = await createClient();
+  const uid = await getUserId(supabase);
+  if (!uid) redirect("/ambassadeurs/connexion");
+  const { data: profil } = await supabase.from("profiles").select("role, first_name, status").eq("id", uid).single();
+  if (profil?.status !== "active" || (profil.role !== "admin" && profil.role !== "staff")) redirect("/ambassadeurs");
+  return { supabase, user: { id: uid }, profil };
+}

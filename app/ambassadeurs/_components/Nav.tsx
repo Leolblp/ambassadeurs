@@ -12,9 +12,14 @@ const ITEMS = [
 
 const TEAM = { href: "/ambassadeurs/equipe", label: "Ma team", d: ["M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2", "M9 7a4 4 0 1 0 0 .01", "M23 21v-2a4 4 0 0 0-3-3.87", "M16 3.13a4 4 0 0 1 0 7.75"] };
 
-export default function Nav({ chef = false }: { chef?: boolean }) {
+const FIDELITE = [
+  ITEMS[3],
+  { href: "/ambassadeurs/carte/ambassadeur", label: "Ambassadeur", d: ["M12 2l3 6.5 7 .8-5.2 4.8 1.4 7L12 17.6 5.8 21.1l1.4-7L2 9.3l7-.8z"] },
+];
+
+export default function Nav({ chef = false, fidelite = false }: { chef?: boolean; fidelite?: boolean }) {
   const path = usePathname();
-  const items = chef ? [...ITEMS.slice(0, 3), TEAM, ITEMS[3]] : ITEMS;
+  const items = fidelite ? FIDELITE : chef ? [...ITEMS.slice(0, 3), TEAM, ITEMS[3]] : ITEMS;
   return (
     <nav
       aria-label="Navigation du club"
@@ -22,7 +27,7 @@ export default function Nav({ chef = false }: { chef?: boolean }) {
     >
       <div style={{ maxWidth: 480, margin: "0 auto", display: "grid", gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))`, padding: "8px 8px 12px" }}>
         {items.map((it) => {
-          const actif = it.href === "/ambassadeurs" ? path === it.href : path.startsWith(it.href);
+          const actif = it.href === "/ambassadeurs" || it.href === "/ambassadeurs/carte" ? path === it.href : path.startsWith(it.href);
           return (
             <Link
               key={it.href}
