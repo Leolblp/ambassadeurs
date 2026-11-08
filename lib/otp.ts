@@ -19,7 +19,7 @@ async function ipClient() {
 }
 
 /**
- * Limite les envois de codes (messages WhatsApp facturés) : 6 par heure par IP, 3 par heure par numéro,
+ * Limite les envois de codes (messages WhatsApp facturés) : 12 par heure par IP, 6 par heure par numéro,
  * 400 par jour au total. Renvoie false si la limite est atteinte (et n'enregistre rien).
  */
 export async function envoiAutorise(tel: string) {
@@ -33,7 +33,7 @@ export async function envoiAutorise(tel: string) {
     admin.from("otp_requests").select("id", { count: "exact", head: true }).eq("phone", phone).gte("created_at", h1),
     admin.from("otp_requests").select("id", { count: "exact", head: true }).gte("created_at", j1),
   ]);
-  if ((parIp ?? 0) >= 6 || (parTel ?? 0) >= 3 || (total ?? 0) >= 400) return false;
+  if ((parIp ?? 0) >= 12 || (parTel ?? 0) >= 6 || (total ?? 0) >= 400) return false;
   await admin.from("otp_requests").insert({ ip, phone });
   return true;
 }

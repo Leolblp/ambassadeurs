@@ -9,7 +9,7 @@ import { compteParTel, emailTechnique, envoiAutorise, envoyerCode, essaiAutorise
 
 export type EtatInscription = { etape: "form" | "code"; tel?: string; erreur?: string; n?: number } | null;
 
-const TROP = "Trop de demandes depuis cette connexion. Réessaie dans une heure.";
+const TROP = "Trop de demandes pour ce numéro. Réessaie dans une heure, ou écris-nous sur Instagram si le code n'arrive pas.";
 
 export async function inscrire(_: EtatInscription, f: FormData): Promise<EtatInscription> {
   const prenom = String(f.get("prenom") ?? "").trim().slice(0, 60);

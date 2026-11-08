@@ -16,6 +16,8 @@ export function telInternational(tel: string | null | undefined): string | null 
   if (!tel) return null;
   let t = tel.replace(/[^\d+]/g, "");
   if (t.startsWith("00")) t = "+" + t.slice(2);
+  // « +33 06… » : le 0 national saisi après l'indicatif est retiré
+  if (/^\+330[1-9]\d{8}$/.test(t)) t = "+33" + t.slice(4);
   if (/^0[1-9]\d{8}$/.test(t)) t = "+33" + t.slice(1);
   if (!t.startsWith("+")) return null;
   const chiffres = t.slice(1);
