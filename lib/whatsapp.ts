@@ -156,3 +156,20 @@ export async function diagnostic() {
     erreurDebug: debug?.error?.message,
   };
 }
+
+/**
+ * Abonne l'app au compte WhatsApp Business (nécessaire pour que Meta envoie les statuts de livraison au webhook),
+ * puis renvoie la liste des apps abonnées et l'état du numéro (qualité, statut, limite d'envoi).
+ */
+export async function brancherStatuts() {
+  const token = process.env.WHATSAPP_TOKEN, waba = process.env.WHATSAPP_WABA_ID, num = process.env.WHATSAPP_PHONE_NUMBER_ID;
+  if (!token || !waba) return { ok: false, texte: "WHATSAPP_TOKEN ou WHATSAPP_WABA_ID absent sur Vercel." };
+  const h = { Authorization: `Bearer ${token}` };
+  const abo = await fetch(`${GRAPH}/${waba}/subscribed_apps`, { method: "POST", headers: h }).then((r) => r.json()).catch((e) => ({ error: String(e) }));
+  const liste = await fetch(`${GRAPH}/${waba}/subscribed_apps`, { headers: h }).then((r) => r.json()).catch(() => null);
+  const numero = num ? await fetch(`${GRAPH}/${num}?fields=display_phone_number,verified_name,status,quality_rating,messaging_limit_tier,code_verification_status,name_status`, { headers: h }).then((r) => r.json()).catch(() => null) : null;
+  const apps = ((liste?.data ?? []) as { whatsapp_business_api_data?: { name?: string; id?: string } }[]).map((a) => `${a.whatsapp_business_api_data?.name ?? "?"} (${a.whatsapp_business_api_data?.id ?? "?"})`);
+  const n = numero && !numero.error ? `Numéro ${numero.display_phone_number} · ${numero.verified_name} · statut ${numero.status} · qualité ${numero.quality_rating} · limite ${numero.messaging_limit_tier ?? "?"} · nom ${numero.name_status ?? "?"}` : `Numéro : ${JSON.stringify(numero?.error ?? numero).slice(0, 200)}`;
+  const a = abo?.success ? "Abonnement OK" : `Abonnement : ${JSON.stringify(abo?.error ?? abo).slice(0, 250)}`;
+  return { ok: !!abo?.success, texte: `${a}. Apps abonnées : ${apps.join(", ") || "aucune"}. ${n}` };
+}

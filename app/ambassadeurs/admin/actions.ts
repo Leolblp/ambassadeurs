@@ -7,7 +7,7 @@ import { majGoogle } from "@/lib/wallet/google";
 import { requireAdmin, requireStaff, codeDepuisPrenom, codeEquipe } from "@/lib/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { after } from "next/server";
-import { envoyerWhatsApp, jourMois, MODELES_META, soumettreModele, statutsModeles, telInternational } from "@/lib/whatsapp";
+import { brancherStatuts, envoyerWhatsApp, jourMois, MODELES_META, soumettreModele, statutsModeles, telInternational } from "@/lib/whatsapp";
 
 export type Resultat = { ok: boolean; message: string } | null;
 
@@ -375,6 +375,12 @@ export async function soumettreModeles(): Promise<Resultat> {
   }
   revalidatePath("/ambassadeurs/admin/whatsapp");
   return erreurs.length ? { ok: false, message: erreurs.join(" · ") } : { ok: true, message: `${aSoumettre.length} modèle(s) soumis à Meta.` };
+}
+
+export async function brancherWebhook(): Promise<Resultat> {
+  await requireAdmin();
+  const r = await brancherStatuts();
+  return { ok: r.ok, message: r.texte };
 }
 
 export async function envoyerTest(): Promise<Resultat> {

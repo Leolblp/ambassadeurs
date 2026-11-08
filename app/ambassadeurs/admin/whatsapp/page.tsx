@@ -1,7 +1,7 @@
 import { requireAdmin } from "@/lib/admin";
 import { dateCourte } from "@/lib/format";
 import { diagnostic, MODELES_META, statutsModeles } from "@/lib/whatsapp";
-import { envoyerTest, soumettreModeles } from "../actions";
+import { brancherWebhook, envoyerTest, soumettreModeles } from "../actions";
 import { BoutonAction } from "../ui";
 
 export const dynamic = "force-dynamic";
@@ -43,6 +43,7 @@ export default async function WhatsApp() {
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <BoutonAction action={soumettreModeles} label="Soumettre à Meta" variante="plein" />
             <BoutonAction action={envoyerTest} label="M'envoyer un test" />
+            <BoutonAction action={brancherWebhook} label="Diagnostic et suivi" />
           </div>
         </div>
         {!statuts.ok && <p className="carte" style={{ margin: 0, padding: 14, color: "var(--rouge)", fontSize: 14 }}>{statuts.erreur}</p>}
