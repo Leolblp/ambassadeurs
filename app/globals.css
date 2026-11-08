@@ -220,3 +220,7 @@ button:active { opacity: 0.85; }
 @media (prefers-reduced-motion: reduce) {
   .carte-fid-anim, .carte-fid-anim .carte-fid-reflet { animation: none; }
 }
+
+/* Grain sur toute la page, pas seulement dans la colonne centrale */
+body { background-image: radial-gradient(rgba(245, 235, 235, 0.05) 1px, transparent 1px); background-size: 3px 3px; }
+.ecran.grain { background-image: none; }

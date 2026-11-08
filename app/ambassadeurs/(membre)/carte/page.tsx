@@ -43,7 +43,7 @@ export default async function Carte() {
   ];
 
   return (
-    <div className="ecran grain" style={{ gap: 20, minHeight: "auto" }}>
+    <div className="ecran" style={{ gap: 20, minHeight: "auto" }}>
       <div>
         <p className="label" style={{ margin: 0 }}>Ma carte</p>
         <h1 className="serif" style={{ margin: "6px 0 0", fontSize: 34, lineHeight: 1.05 }}>Strictement personnelle.</h1>
