@@ -88,7 +88,7 @@ export default function Inscription() {
           </form>
           <form action={relancer} style={{ alignSelf: "center" }}>
             <input type="hidden" name="tel" value={tel} />
-            <button type="submit" disabled={relance} style={{ background: "none", border: 0, color: "var(--gris)", fontSize: 14, textDecoration: "underline", cursor: "pointer" }}>
+            <button type="submit" disabled={relance} style={{ minHeight: 44, padding: "0 12px",  background: "none", border: 0, color: "var(--gris)", fontSize: 14, textDecoration: "underline", cursor: "pointer" }}>
               {relance ? "Envoi…" : "Renvoyer le code"}
             </button>
           </form>

@@ -83,7 +83,7 @@ gtag('config', '${GA}');`}
 
 export function LienCookies({ style }: { style?: React.CSSProperties }) {
   return (
-    <button type="button" onClick={rouvrirConsentement} style={{ background: "none", border: 0, padding: 0, color: "var(--gris)", font: "inherit", textDecoration: "underline", cursor: "pointer", ...style }}>
+    <button type="button" className="lien-tactile" onClick={rouvrirConsentement} style={{ background: "none", border: 0, padding: 0, color: "var(--gris)", font: "inherit", textDecoration: "underline", cursor: "pointer", ...style }}>
       Gérer les cookies
     </button>
   );

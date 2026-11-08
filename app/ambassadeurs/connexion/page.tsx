@@ -64,7 +64,7 @@ function ParWhatsApp({ versEmail }: { versEmail: () => void }) {
         {etatTel?.erreur && <p role="alert" style={{ margin: 0, color: "var(--rouge)", fontSize: 14 }}>{etatTel.erreur}</p>}
         <button className="btn" type="submit" disabled={envoiTel} style={{ width: "100%" }}>{envoiTel ? "Envoi…" : "Recevoir mon code"}</button>
         <button type="button" onClick={versEmail} style={lienDiscret}>Recevoir plutôt un lien par email</button>
-        <Link href="/ambassadeurs/rejoindre" style={{ textAlign: "center", fontSize: 14, color: "var(--gris)" }}>Pas encore membre ? Demander mon accès</Link>
+        <Link href="/carte" style={{ textAlign: "center", fontSize: 14, color: "var(--gris)" }}>Pas encore de carte ? Prendre ma carte</Link>
       </form>
     </>
   );
