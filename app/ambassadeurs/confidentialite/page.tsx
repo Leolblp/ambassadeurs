@@ -17,7 +17,7 @@ export default function Confidentialite() {
 
       <Bloc titre="Quelles données ?">
         <p style={p0}>
-          Prénom, nom, email, numéro de téléphone, compte Instagram, motivation (demande d&apos;accès) ; numéro de membre, code membre, team, points et
+          Prénom, nom, numéro de téléphone, date de naissance (carte), compte Instagram, motivation (demande d&apos;accès) ; numéro de membre, code membre, team, points et
           historique ; captures et liens envoyés comme preuves de mission ; privilèges débloqués ; informations techniques de connexion.
           Si tu ajoutes ta carte à Apple Wallet ou Google Wallet : un identifiant d&apos;appareil anonyme fourni par Apple, ou l&apos;identifiant de ta carte chez Google.
         </p>
@@ -29,7 +29,7 @@ export default function Confidentialite() {
             <thead><tr><th style={td}>Finalité</th><th style={td}>Base légale</th></tr></thead>
             <tbody>
               <tr><td style={td}>Étudier ta demande d&apos;accès, gérer ton compte, tes missions, tes points et tes privilèges</td><td style={td}>Exécution de ton adhésion au club</td></tr>
-              <tr><td style={td}>Te connecter (code par WhatsApp ou lien par email)</td><td style={td}>Exécution de ton adhésion</td></tr>
+              <tr><td style={td}>Te connecter (code par WhatsApp)</td><td style={td}>Exécution de ton adhésion</td></tr>
               <tr><td style={td}>T&apos;envoyer les messages du club sur WhatsApp (missions, rappels, points)</td><td style={td}>Ton consentement, retirable à tout moment dans Ma carte</td></tr>
               <tr><td style={td}>Mettre à jour ta carte Wallet et t&apos;envoyer ses notifications</td><td style={td}>Ton consentement (ajout de la carte), retirable en la supprimant</td></tr>
               <tr><td style={td}>Mesurer la fréquentation du site avec Google Analytics</td><td style={td}>Ton consentement, via le bandeau</td></tr>
@@ -47,7 +47,7 @@ export default function Confidentialite() {
         </p>
         <p style={p0}>
           Prestataires techniques, qui traitent les données pour notre compte : Vercel (hébergement), Supabase (base de données, Union européenne),
-          Meta (WhatsApp), Resend (emails), Apple et Google (cartes Wallet), Google (mesure d&apos;audience, si tu l&apos;acceptes). Certains sont établis aux États-Unis : les transferts sont encadrés par le
+          Meta (WhatsApp), Apple et Google (cartes Wallet), Google (mesure d&apos;audience, si tu l&apos;acceptes). Certains sont établis aux États-Unis : les transferts sont encadrés par le
           Data Privacy Framework UE-États-Unis ou par les clauses contractuelles types de la Commission européenne.
         </p>
       </Bloc>

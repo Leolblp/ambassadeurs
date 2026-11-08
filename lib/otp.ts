@@ -70,3 +70,13 @@ export async function essaiAutorise(memberId: string, email: string) {
 export async function essaisEffaces(memberId: string) {
   await createAdminClient().from("login_attempts").delete().eq("member_id", memberId);
 }
+
+/**
+ * Adresse technique liée au numéro. La connexion Supabase repose sur un email, mais aucun email n'est
+ * jamais envoyé : le code est généré côté serveur et part uniquement sur WhatsApp.
+ */
+export function emailTechnique(tel: string) {
+  const n = telInternational(tel);
+  if (!n) throw new Error("numéro invalide");
+  return `${n}@wa.lacom.club`;
+}

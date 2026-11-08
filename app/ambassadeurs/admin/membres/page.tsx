@@ -40,7 +40,7 @@ export default async function Membres({ searchParams }: { searchParams: Promise<
         </nav>
         <form style={{ display: "flex", gap: 8, marginTop: 12 }}>
           {carte && <input type="hidden" name="vue" value="carte" />}
-          <input className="champ" name="q" defaultValue={recherche} placeholder="Nom, téléphone ou email" style={{ flexGrow: 1 }} />
+          <input className="champ" name="q" defaultValue={recherche} placeholder="Nom ou téléphone" style={{ flexGrow: 1 }} />
           <button className="btn" type="submit" style={{ minHeight: 48 }}>Chercher</button>
         </form>
       </header>
@@ -62,7 +62,7 @@ export default async function Membres({ searchParams }: { searchParams: Promise<
 
             <div style={{ display: "flex", flexDirection: "column", gap: 16, paddingTop: 16, marginTop: 14, borderTop: "1px solid var(--bord)" }}>
               <div style={{ fontSize: 14, lineHeight: 1.7 }}>
-                {m.email}<br />
+                {m.email && !m.email.endsWith("@wa.lacom.club") && <>{m.email}<br /></>}
                 {m.phone || "Pas de téléphone"}<br />
                 {m.instagram ? <a href={`https://instagram.com/${m.instagram.replace(/^@/, "")}`} target="_blank" rel="noreferrer">@{m.instagram.replace(/^@/, "")}</a> : "Pas d'Instagram"}
               </div>

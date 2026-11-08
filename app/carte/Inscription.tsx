@@ -61,7 +61,6 @@ export default function Inscription() {
               <div><label className="champ-label" htmlFor="nom">Nom</label><input className="champ" id="nom" name="nom" required autoComplete="family-name" /></div>
             </div>
             <div><label className="champ-label" htmlFor="tel">Téléphone (WhatsApp)</label><input className="champ" id="tel" name="tel" type="tel" autoComplete="tel" required placeholder="06 12 34 56 78" /></div>
-            <div><label className="champ-label" htmlFor="email">Email</label><input className="champ" id="email" name="email" type="email" required autoComplete="email" autoCapitalize="none" spellCheck={false} /></div>
             <div><label className="champ-label" htmlFor="naissance">Date de naissance</label><input className="champ" id="naissance" name="naissance" type="date" required autoComplete="bday" /></div>
 
             <label style={{ display: "flex", gap: 10, alignItems: "flex-start", fontSize: 13, lineHeight: 1.45, color: "var(--gris)", cursor: "pointer" }}>

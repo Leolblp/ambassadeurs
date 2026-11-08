@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { pousserCarte } from "@/lib/wallet";
+import { compteParTel, emailTechnique } from "@/lib/otp";
 import { majGoogle } from "@/lib/wallet/google";
 import { requireAdmin, requireStaff, codeDepuisPrenom, codeEquipe } from "@/lib/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -70,11 +71,11 @@ export async function accepterDemande(id: string): Promise<Resultat> {
   }
 
   // 0. Déjà membre avec la carte fidélité : il passe ambassadeur, même compte
-  const { data: carte } = await admin.from("profiles").select("id, kind, status, phone").eq("email", String(d.email).toLowerCase()).maybeSingle();
+  const carte = d.phone ? await compteParTel(d.phone) : null;
   if (carte && carte.kind === "fidelite") {
     // Seul un compte carte actif, au même numéro que la demande, peut passer ambassadeur
-    if (carte.status !== "active" || telInternational(carte.phone) !== telInternational(d.phone))
-      return { ok: false, message: "Un compte carte existe avec cet email mais il n'est pas vérifié ou son numéro diffère de la demande. Refuse ou contacte la personne." };
+    if (carte.status !== "active")
+      return { ok: false, message: "Un compte carte existe avec ce numéro mais il n'est pas encore vérifié. Demande à la personne de se connecter une fois, puis réessaie." };
     const base0 = codeDepuisPrenom(d.first_name);
     let code0 = base0;
     for (let i = 2; i < 50; i++) {
@@ -89,17 +90,14 @@ export async function accepterDemande(id: string): Promise<Resultat> {
     return { ok: true, message: `${d.first_name} avait déjà la carte : passé ambassadeur, code ${code0}. Il le voit à sa prochaine connexion.` };
   }
 
-  // 1. Création du compte (le profil est créé automatiquement).
-  //    Avec WhatsApp : compte créé sans email, le lien d'activation part sur WhatsApp.
-  //    Sans WhatsApp : invitation classique par email.
-  const origine = process.env.NEXT_PUBLIC_SITE_URL || "https://lacom.club";
+  // 1. Création du compte (le profil est créé automatiquement). Aucun email : tout passe par WhatsApp.
+  if (!telInternational(d.phone)) return { ok: false, message: "Numéro WhatsApp invalide sur la demande : impossible d'envoyer l'accès." };
+  if (await compteParTel(d.phone)) return { ok: false, message: "Ce numéro a déjà un compte : la personne peut se connecter avec son numéro." };
   const metadata = { first_name: d.first_name, last_name: d.last_name, phone: d.phone, instagram: d.instagram };
-  const parWhatsApp = !!(d.whatsapp_optin && telInternational(d.phone) && process.env.WHATSAPP_TOKEN);
-  const { data: cree, error: errCreation } = parWhatsApp
-    ? await admin.auth.admin.createUser({ email: d.email, email_confirm: true, user_metadata: metadata })
-    : await admin.auth.admin.inviteUserByEmail(d.email, { data: metadata, redirectTo: `${origine}/ambassadeurs/auth/bienvenue` });
+  const emailCompte = String(d.email || "").endsWith("@wa.lacom.club") || !d.email ? emailTechnique(d.phone) : String(d.email).toLowerCase();
+  const { data: cree, error: errCreation } = await admin.auth.admin.createUser({ email: emailCompte, email_confirm: true, user_metadata: metadata });
   if (errCreation || !cree.user) {
-    return { ok: false, message: errCreation?.message.toLowerCase().includes("already") ? "Cet email a déjà un compte." : "Création du compte impossible : " + errCreation?.message };
+    return { ok: false, message: errCreation?.message.toLowerCase().includes("already") ? "Ce compte existe déjà : la personne peut se connecter avec son numéro." : "Création du compte impossible : " + errCreation?.message };
   }
 
   // 2. Code membre unique
@@ -110,23 +108,20 @@ export async function accepterDemande(id: string): Promise<Resultat> {
     if (!pris) break;
     code = base.replace(/XOXO$/, `${i}XOXO`);
   }
-  await admin.from("profiles").update({ promo_code: code, team_id: d.team_id ?? null, whatsapp_optin: !!d.whatsapp_optin, status: "active" }).eq("id", cree.user.id);
-  let canal = "par email";
-  if (parWhatsApp) {
-    const { data: lien } = await admin.auth.admin.generateLink({ type: "magiclink", email: d.email });
-    const envoye = lien?.properties?.hashed_token
-      ? await envoyerWhatsApp({ id: cree.user.id, phone: d.phone, whatsapp_optin: true }, "xoxo_acces_accepte", [d.first_name || "toi"], { bouton: lien.properties.hashed_token })
-      : false;
-    if (envoye) canal = "sur WhatsApp";
-    else await admin.auth.signInWithOtp({ email: d.email, options: { shouldCreateUser: false, emailRedirectTo: `${origine}/ambassadeurs/auth/callback` } });
-  }
+  await admin.from("profiles").update({ promo_code: code, team_id: d.team_id ?? null, whatsapp_optin: true, status: "active" }).eq("id", cree.user.id);
+  // Message d'accueil WhatsApp avec lien d'activation. S'il échoue, la personne se connecte avec son numéro (code WhatsApp).
+  const { data: lien } = await admin.auth.admin.generateLink({ type: "magiclink", email: emailCompte });
+  const envoye = lien?.properties?.hashed_token
+    ? await envoyerWhatsApp({ id: cree.user.id, phone: d.phone, whatsapp_optin: true }, "xoxo_acces_accepte", [d.first_name || "toi"], { bouton: lien.properties.hashed_token })
+    : false;
+  const canal = envoye ? "invitation envoyée sur WhatsApp" : "WhatsApp indisponible : dis-lui de se connecter sur lacom.club avec son numéro";
 
   // 3. Demande marquée acceptée
   await supabase.from("access_requests").update({ status: "accepted", reviewed_by: user.id, reviewed_at: new Date().toISOString() }).eq("id", id);
 
   revalidatePath("/ambassadeurs/admin/demandes");
   revalidatePath("/ambassadeurs/equipe");
-  return { ok: true, message: `Bienvenue à ${d.first_name} : code ${code}, invitation envoyée ${canal}.` };
+  return { ok: true, message: `Bienvenue à ${d.first_name} : code ${code}, ${canal}.` };
 }
 
 export async function refuserDemande(id: string): Promise<Resultat> {

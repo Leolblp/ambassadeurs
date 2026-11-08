@@ -52,7 +52,7 @@ export default async function GuideChef() {
         <Etapes items={[
           <>Les demandes apparaissent en haut de <Link href="/ambassadeurs/equipe">Ma team</Link>.</>,
           <>Regarde l&apos;Instagram et la motivation.</>,
-          <><b>Accepter</b> : la personne reçoit son invitation par email, avec son numéro et son code. Elle rejoint ta team automatiquement.</>,
+          <><b>Accepter</b> : la personne reçoit son invitation sur WhatsApp, avec son numéro et son code. Elle rejoint ta team automatiquement.</>,
           <><b>Refuser</b> : la demande est close.</>,
         ]} />
       </Section>

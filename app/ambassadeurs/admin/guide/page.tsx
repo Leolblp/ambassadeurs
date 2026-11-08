@@ -13,7 +13,7 @@ const SOMMAIRE = [
   { id: "privileges", titre: "Remettre un privilège" },
   { id: "equipes", titre: "Équipes et chefs d'équipe" },
   { id: "membres", titre: "Gérer les membres et les admins" },
-  { id: "emails", titre: "Emails et connexion" },
+  { id: "emails", titre: "Connexion" },
   { id: "depannage", titre: "En cas de problème" },
 ];
 
@@ -62,7 +62,7 @@ export default async function GuideAdmin() {
         <Etapes items={[
           <>Ouvre <Link href="/ambassadeurs/admin/demandes">Demandes d&apos;accès</Link>.</>,
           <>Regarde le profil Instagram (cliquable) et la motivation. Si la demande vient d&apos;une team, c&apos;est indiqué sous le nom.</>,
-          <>Clique <b>Accepter</b> : le compte est créé, un numéro de membre et un code personnel (ex. <code>LEAXOXO</code>) sont attribués, et l&apos;email « Bienvenue dans le XOXO Club » part automatiquement.</>,
+          <>Clique <b>Accepter</b> : le compte est créé, un numéro de membre et un code personnel (ex. <code>LEAXOXO</code>) sont attribués, et le message de bienvenue part sur WhatsApp.</>,
           <>Ou clique <b>Refuser</b> : la personne n&apos;est pas prévenue, la demande passe dans « Dernières décisions ».</>,
         ]} />
         <Encart titre="Sélection" ton="astuce">Garde le club rare. Mieux vaut 30 membres actifs que 200 inactifs. Les demandes venant d&apos;un chef d&apos;équipe peuvent aussi être acceptées par ce chef.</Encart>
@@ -158,11 +158,10 @@ export default async function GuideAdmin() {
         <Encart titre="Attention" ton="attention">Un admin peut accepter des membres et modifier des points. Ne donne cet accès qu&apos;à des personnes de confiance.</Encart>
       </Section>
 
-      <Section id="emails" numero={11} titre="Emails et connexion">
+      <Section id="emails" numero={11} titre="Connexion">
         <Liste items={[
-          <>Il n&apos;y a <b>pas de mot de passe</b> : on se connecte avec un lien reçu par email, valable une heure.</>,
-          <>Les emails partent de <b>XOXO Club &lt;xoxo@lacom.club&gt;</b>. Personne ne lit cette adresse : les membres doivent te contacter sur WhatsApp ou Instagram.</>,
-          <>Si un membre ne reçoit rien : vérifier ses spams, puis l&apos;orthographe de son email dans sa fiche.</>,
+          <>Il n&apos;y a <b>ni mot de passe ni email</b> : on se connecte avec son numéro, et un code à 6 chiffres arrive sur WhatsApp.</>,
+          <>Si un membre ne reçoit rien : vérifier le numéro dans sa fiche et que WhatsApp est installé dessus.</>,
         ]} />
       </Section>
 
@@ -170,7 +169,7 @@ export default async function GuideAdmin() {
         <Tableau
           entetes={["Situation", "Que faire"]}
           lignes={[
-            ["« Cet email a déjà un compte »", "La personne est déjà membre : elle peut se connecter directement sur lacom.club/ambassadeurs/connexion."],
+            ["« Ce numéro a déjà un compte »", "La personne est déjà membre : elle peut se connecter directement sur lacom.club/ambassadeurs/connexion."],
             ["Points crédités par erreur", "Fiche du membre > ajustement négatif avec la raison."],
             ["Privilège débloqué par erreur", "Privilèges à remettre > Annuler (points rendus)."],
             ["Un membre triche", "Refuser ses preuves, ajuster ses points, puis Suspendre si besoin."],

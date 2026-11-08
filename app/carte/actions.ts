@@ -5,7 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { telInternational } from "@/lib/whatsapp";
 import { age } from "@/lib/fidelite";
-import { compteParTel, envoiAutorise, envoyerCode, essaiAutorise, essaisEffaces } from "@/lib/otp";
+import { compteParTel, emailTechnique, envoiAutorise, envoyerCode, essaiAutorise, essaisEffaces } from "@/lib/otp";
 
 export type EtatInscription = { etape: "form" | "code"; tel?: string; erreur?: string; n?: number } | null;
 
@@ -14,12 +14,10 @@ const TROP = "Trop de demandes depuis cette connexion. Réessaie dans une heure.
 export async function inscrire(_: EtatInscription, f: FormData): Promise<EtatInscription> {
   const prenom = String(f.get("prenom") ?? "").trim().slice(0, 60);
   const nom = String(f.get("nom") ?? "").trim().slice(0, 60);
-  const email = String(f.get("email") ?? "").trim().toLowerCase().slice(0, 120);
   const tel = String(f.get("tel") ?? "").trim().slice(0, 30);
   const naissance = String(f.get("naissance") ?? "").trim();
 
   if (!prenom || !nom) return { etape: "form", erreur: "Indique ton prénom et ton nom." };
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { etape: "form", erreur: "Email invalide." };
   if (!telInternational(tel)) return { etape: "form", erreur: "Numéro invalide. Exemple : 06 12 34 56 78." };
   if (!/^\d{4}-\d{2}-\d{2}$/.test(naissance) || age(naissance) > 100) return { etape: "form", erreur: "Date de naissance invalide." };
   if (age(naissance) < 18) return { etape: "form", erreur: "La carte est réservée aux 18 ans et plus." };
@@ -37,12 +35,12 @@ export async function inscrire(_: EtatInscription, f: FormData): Promise<EtatIns
   }
 
   const admin = createAdminClient();
+  const email = emailTechnique(tel);
   const { data: cree, error } = await admin.auth.admin.createUser({
     email, email_confirm: true,
     user_metadata: { first_name: prenom, last_name: nom, phone: tel },
   });
   if (error || !cree.user) {
-    // Email déjà lié à un autre numéro : même réponse neutre, aucun code n'est envoyé à ce numéro
     if (error?.message.toLowerCase().includes("already")) return suite;
     return { etape: "form", erreur: "Inscription impossible pour le moment. Réessaie dans un instant." };
   }

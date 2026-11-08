@@ -32,8 +32,6 @@ export default async function Demandes() {
                 <dl style={{ margin: 0, display: "grid", gridTemplateColumns: "90px 1fr", gap: "6px 10px", fontSize: 14 }}>
                   <dt className="label-gris" style={{ paddingTop: 3 }}>Instagram</dt>
                   <dd style={{ margin: 0 }}>{insta ? <a href={`https://instagram.com/${insta}`} target="_blank" rel="noreferrer">@{insta}</a> : "—"}</dd>
-                  <dt className="label-gris" style={{ paddingTop: 3 }}>Email</dt>
-                  <dd style={{ margin: 0, wordBreak: "break-all" }}>{d.email}</dd>
                   <dt className="label-gris" style={{ paddingTop: 3 }}>Tél.</dt>
                   <dd style={{ margin: 0 }}>{d.phone || "—"}</dd>
                 </dl>
