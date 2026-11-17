@@ -11,13 +11,15 @@ export default async function Accueil() {
   const [classement, privileges, soiree, missions, preuves, reglages, equipes, paliers] = await Promise.all([
     supabase.rpc("leaderboard_month"),
     supabase.from("privileges").select("name, cost").eq("is_active", true).order("cost"),
-    supabase.from("events").select("id, name, starts_at, ticket_url").gte("starts_at", new Date().toISOString()).order("starts_at").limit(1).maybeSingle(),
+    supabase.from("events").select("id, name, starts_at, ticket_url, description").gte("starts_at", new Date().toISOString()).order("starts_at").limit(1).maybeSingle(),
     supabase.from("missions").select("id, title, points, deadline, proof_type").eq("is_active", true).order("deadline", { ascending: true, nullsFirst: false }),
     supabase.from("proofs").select("mission_id, status").eq("member_id", user.id),
     supabase.from("app_settings").select("points_per_ticket").single(),
     profil.team_id ? supabase.rpc("leaderboard_teams_month") : Promise.resolve({ data: [] }),
     ventesSoiree(supabase, user.id),
   ]);
+  // Lien du dossier de visuels : première adresse trouvée dans la description de la soirée
+  const visuels = /https?:\/\/[^\s)]+/.exec(soiree.data?.description ?? "")?.[0] ?? null;
   const maTeam = ((equipes.data ?? []) as { team_id: string; name: string; rank: number; members: number }[]).find((t) => t.team_id === profil.team_id);
   const nbTeams = (equipes.data ?? []).length;
 
@@ -100,6 +102,17 @@ export default async function Accueil() {
             <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: ".16em", textTransform: "uppercase" }}>missions</div>
           </div>
         </section>
+      )}
+
+      {visuels && (
+        <a href={visuels} target="_blank" rel="noopener noreferrer" className="carte" style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", borderRadius: 16, textDecoration: "none" }}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--rouge)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flex: "none" }}><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /></svg>
+          <span style={{ flexGrow: 1, minWidth: 0 }}>
+            <span style={{ display: "block", fontSize: 15, fontWeight: 700 }}>Visuels et vidéos à utiliser</span>
+            <span style={{ display: "block", fontSize: 13, color: "var(--gris)", marginTop: 2 }}>Le dossier Google Drive de la soirée</span>
+          </span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gris)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" /></svg>
+        </a>
       )}
 
       {profil.promo_code && (
