@@ -1,11 +1,10 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-export type Avantage = "coupe_file" | "shot" | "anniv";
+export type Avantage = "coupe_file" | "anniv";
 
 export const AVANTAGES: Record<Avantage, { titre: string; detail: string }> = {
   coupe_file: { titre: "Coupe-file", detail: "Tu passes devant la file, à chaque soirée." },
-  shot: { titre: "1 shot offert", detail: "Au bar, à chaque soirée." },
   anniv: { titre: "Surprise d'anniversaire", detail: "Une fois pendant ton mois d'anniversaire." },
 };
 
@@ -28,7 +27,7 @@ export function age(naissance: string, a = soireeDuJour()) {
   return ya - an - (ym < mo || (ym === mo && yj < jo) ? 1 : 0);
 }
 
-/** Avantages déjà utilisés : ce soir (coupe-file, shot) et cette année (anniversaire). */
+/** Avantages déjà utilisés : ce soir (coupe-file) et cette année (anniversaire). */
 export async function utilisations(memberId: string, soiree = soireeDuJour()) {
   const { data } = await createAdminClient()
     .from("fid_usages")
@@ -38,7 +37,6 @@ export async function utilisations(memberId: string, soiree = soireeDuJour()) {
   const lignes = data ?? [];
   return {
     coupe_file: lignes.find((l) => l.avantage === "coupe_file" && l.soiree_date === soiree)?.created_at as string | undefined,
-    shot: lignes.find((l) => l.avantage === "shot" && l.soiree_date === soiree)?.created_at as string | undefined,
     anniv: lignes.find((l) => l.avantage === "anniv")?.created_at as string | undefined,
   };
 }

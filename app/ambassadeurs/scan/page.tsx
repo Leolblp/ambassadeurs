@@ -21,7 +21,7 @@ export default async function Scan() {
         </div>
         {profil.role === "admin" && <a href="/ambassadeurs/admin" className="label-gris" style={{ textDecoration: "none" }}>Admin</a>}
       </div>
-      <p className="label-gris" style={{ margin: 0 }}>Ce soir : {n("coupe_file")} coupe-file · {n("shot")} shots · {n("anniv")} anniv</p>
+      <p className="label-gris" style={{ margin: 0 }}>Ce soir : {n("coupe_file")} coupe-file · {n("anniv")} anniv</p>
       <Scanner />
     </div>
   );

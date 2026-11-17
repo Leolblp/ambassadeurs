@@ -31,7 +31,7 @@ export default function Entree() {
         <CarteFid />
 
         <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "10px 28px", fontSize: 16 }}>
-          {["Coupe-file à chaque soirée", "1 shot offert à chaque soirée", "Une surprise pour ton anniversaire"].map((t) => (
+          {["Coupe-file à chaque soirée", "Des offres surprises réservées à la carte"].map((t) => (
             <li key={t} style={{ display: "flex", gap: 10, alignItems: "baseline" }}><span aria-hidden="true" style={{ color: "var(--rouge)" }}>✕</span>{t}</li>
           ))}
         </ul>

@@ -7,7 +7,7 @@ import { numero as fmtNumero } from "@/lib/format";
 
 export type Fiche = {
   id: string; nom: string; numero: string; niveau: string; anniv: boolean; naissance: string | null;
-  deja: { coupe_file?: string; shot?: string; anniv?: string };
+  deja: { coupe_file?: string; anniv?: string };
   manuel?: boolean;
 };
 export type Reponse = { ok: true; fiche: Fiche; message?: string } | { ok: false; message: string };
@@ -50,7 +50,7 @@ export async function chercher(texte: string): Promise<Reponse> {
 
 export async function valider(memberId: string, avantage: Avantage): Promise<Reponse> {
   const { user } = await requireScan();
-  if (!["coupe_file", "shot", "anniv"].includes(avantage)) return { ok: false, message: "Avantage inconnu." };
+  if (!["coupe_file", "anniv"].includes(avantage)) return { ok: false, message: "Avantage inconnu." };
   const f = await fiche(memberId);
   if (!f) return { ok: false, message: "Carte désactivée." };
   if (avantage === "anniv" && !f.anniv) return { ok: false, message: "Ce n'est pas son mois d'anniversaire." };
@@ -58,5 +58,5 @@ export async function valider(memberId: string, avantage: Avantage): Promise<Rep
   const { error } = await createAdminClient().from("fid_usages").insert({ member_id: memberId, soiree_date: soireeDuJour(), avantage, staff_id: user.id });
   const maj = await fiche(memberId);
   if (error) return error.code === "23505" ? { ok: true, fiche: maj!, message: "Déjà utilisé." } : { ok: false, message: "Enregistrement impossible, réessaie." };
-  return { ok: true, fiche: maj!, message: avantage === "coupe_file" ? "Coupe-file validé." : avantage === "shot" ? "Shot servi." : "Surprise remise." };
+  return { ok: true, fiche: maj!, message: avantage === "coupe_file" ? "Coupe-file validé." : "Surprise remise." };
 }

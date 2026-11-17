@@ -30,7 +30,7 @@ export default function CarteFid({
       <div style={{ position: "relative", display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 10 }}>
         <div style={{ minWidth: 0 }}>
           <div className="display" style={{ fontSize: 22, textTransform: "uppercase", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{nom}</div>
-          <div style={{ fontSize: 11, color: "var(--gris)", marginTop: 2 }}>{depuis ? `Membre depuis ${depuis}` : "Coupe-file · Shot · Anniversaire"}</div>
+          <div style={{ fontSize: 11, color: "var(--gris)", marginTop: 2 }}>{depuis ? `Membre depuis ${depuis}` : "Coupe-file · Offres surprises"}</div>
         </div>
         {qr ? (
           <div className="carte-fid-qr" dangerouslySetInnerHTML={{ __html: qr }} />

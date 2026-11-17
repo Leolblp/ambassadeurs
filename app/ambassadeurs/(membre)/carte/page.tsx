@@ -34,7 +34,6 @@ export default async function Carte() {
   const heure = (iso: string) => new Date(iso).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris" });
   const lignesAvantages = [
     { cle: "coupe_file", titre: AVANTAGES.coupe_file.titre, icone: "M5 12h14M13 6l6 6-6 6", etat: deja.coupe_file ? "utilise" : "dispo", texte: deja.coupe_file ? `Utilisé ce soir à ${heure(deja.coupe_file)}` : AVANTAGES.coupe_file.detail },
-    { cle: "shot", titre: AVANTAGES.shot.titre, icone: "M6 3h12l-2 18H8z M7 8h10", etat: deja.shot ? "utilise" : "dispo", texte: deja.shot ? `Servi ce soir à ${heure(deja.shot)}` : AVANTAGES.shot.detail },
     {
       cle: "anniv", titre: AVANTAGES.anniv.titre, icone: "M20 12v9H4v-9 M2 7h20v5H2z M12 21V7 M12 7c-2-4-6-4-6-1s6 1 6 1 6 2 6-1-4-3-6 1",
       etat: deja.anniv ? "utilise" : anniv ? "dispo" : "attente",
