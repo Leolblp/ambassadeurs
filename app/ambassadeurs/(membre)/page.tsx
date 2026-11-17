@@ -8,13 +8,12 @@ import { ventesSoiree } from "@/lib/paliers-soiree";
 export default async function Accueil() {
   const { supabase, user, profil, solde } = await getMembre();
 
-  const [classement, privileges, soiree, missions, preuves, reglages, equipes, paliers] = await Promise.all([
+  const [classement, privileges, soiree, missions, preuves, equipes, paliers] = await Promise.all([
     supabase.rpc("leaderboard_month"),
     supabase.from("privileges").select("name, cost").eq("is_active", true).order("cost"),
     supabase.from("events").select("id, name, starts_at, ticket_url, description").gte("starts_at", new Date().toISOString()).order("starts_at").limit(1).maybeSingle(),
     supabase.from("missions").select("id, title, points, deadline, proof_type").eq("is_active", true).order("deadline", { ascending: true, nullsFirst: false }),
     supabase.from("proofs").select("mission_id, status").eq("member_id", user.id),
-    supabase.from("app_settings").select("points_per_ticket").single(),
     profil.team_id ? supabase.rpc("leaderboard_teams_month") : Promise.resolve({ data: [] }),
     ventesSoiree(supabase, user.id),
   ]);
@@ -118,7 +117,7 @@ export default async function Accueil() {
       {profil.promo_code && (
         <section style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, padding: "14px 16px", border: "1px dashed var(--bord-rouge)", borderRadius: 16 }}>
           <div>
-            <div className="label-gris">Ton code · {reglages.data?.points_per_ticket ?? 30} pts par billet</div>
+            <div className="label-gris">Ton code</div>
             <div className="display" style={{ fontSize: 22, letterSpacing: ".08em", marginTop: 2 }}>{profil.promo_code}</div>
           </div>
           <Copier code={profil.promo_code} partage />
