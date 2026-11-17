@@ -124,6 +124,29 @@ export async function accepterDemande(id: string): Promise<Resultat> {
   return { ok: true, message: `Bienvenue à ${d.first_name} : code ${code}, ${canal}. Crée le code dans Yurplan (bloc en haut de cette page).` };
 }
 
+/** Passe une carte fidélité en ambassadeur, sans demande : même compte, code PRENOMXOXO. */
+export async function passerAmbassadeur(id: string): Promise<Resultat> {
+  await requireAdmin();
+  const admin = createAdminClient();
+  const { data: m } = await admin.from("profiles").select("id, first_name, kind, status").eq("id", id).single();
+  if (!m) return { ok: false, message: "Membre introuvable." };
+  if (m.kind !== "fidelite") return { ok: false, message: "Déjà ambassadeur." };
+  if (m.status !== "active") return { ok: false, message: "Carte pas encore activée : la personne doit se connecter une fois avant." };
+  const base = codeDepuisPrenom(m.first_name);
+  let code = base;
+  for (let i = 2; i < 50; i++) {
+    const { data: pris } = await admin.from("profiles").select("id").eq("promo_code", code).maybeSingle();
+    if (!pris) break;
+    code = base.replace(/XOXO$/, `${i}XOXO`);
+  }
+  const { error } = await admin.from("profiles").update({ kind: "ambassadeur", promo_code: code }).eq("id", id);
+  if (error) return { ok: false, message: error.message };
+  after(async () => { await pousserCarte(id).catch(() => {}); await majGoogle(id).catch(() => {}); });
+  revalidatePath("/ambassadeurs/admin/membres");
+  revalidatePath("/ambassadeurs/admin");
+  return { ok: true, message: `${m.first_name ?? "Membre"} est ambassadeur, code ${code}. Crée le code dans Yurplan (bloc en haut de l'admin).` };
+}
+
 export async function refuserDemande(id: string): Promise<Resultat> {
   const { supabase, user } = await requireStaff();
   const { error } = await supabase.from("access_requests").update({ status: "refused", reviewed_by: user.id, reviewed_at: new Date().toISOString() }).eq("id", id).eq("status", "pending");

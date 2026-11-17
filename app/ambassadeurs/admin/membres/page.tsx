@@ -1,7 +1,7 @@
 import { requireAdmin } from "@/lib/admin";
 import { numero, pts } from "@/lib/format";
 import Link from "next/link";
-import { affecterEquipe, ajusterPoints, changerRole, changerStatutMembre, supprimerMembre } from "../actions";
+import { affecterEquipe, ajusterPoints, changerRole, changerStatutMembre, passerAmbassadeur, supprimerMembre } from "../actions";
 import { BoutonAction, FormAction } from "../ui";
 
 export default async function Membres({ searchParams }: { searchParams: Promise<{ vue?: string; q?: string }> }) {
@@ -84,6 +84,14 @@ export default async function Membres({ searchParams }: { searchParams: Promise<
                 </div>
               </FormAction>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {carte && m.status === "active" && (
+                <BoutonAction
+                  action={passerAmbassadeur.bind(null, m.id)}
+                  label="Passer ambassadeur"
+                  variante="plein"
+                  confirmer={`Passer ${m.first_name} ambassadeur ? Il garde son compte et reçoit un code PRENOMXOXO.`}
+                />
+              )}
               {m.role !== "admin" && (
                 <BoutonAction
                   action={changerRole.bind(null, m.id, m.role === "staff" ? "member" : "staff")}
