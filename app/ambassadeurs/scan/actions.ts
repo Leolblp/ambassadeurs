@@ -4,11 +4,15 @@ import { requireScan } from "@/lib/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { moisAnniv, soireeDuJour, utilisations, type Avantage } from "@/lib/fidelite";
 import { numero as fmtNumero } from "@/lib/format";
+import { gains } from "@/lib/paliers";
+import { ventesSoiree } from "@/lib/paliers-soiree";
 
 export type Fiche = {
   id: string; nom: string; numero: string; niveau: string; anniv: boolean; naissance: string | null;
   deja: { coupe_file?: string; anniv?: string };
   manuel?: boolean;
+  /** Ambassadeur : billets vendus sur la soirée et avantages débloqués. */
+  ventes?: number; paliers?: string[];
 };
 export type Reponse = { ok: true; fiche: Fiche; message?: string } | { ok: false; message: string };
 
@@ -16,7 +20,9 @@ async function fiche(memberId: string): Promise<Fiche | null> {
   const { data: p } = await createAdminClient().from("profiles").select("id, first_name, last_name, member_number, kind, status, birth_date").eq("id", memberId).maybeSingle();
   if (!p || p.status !== "active") return null;
   const soiree = soireeDuJour();
+  const ventes = p.kind === "fidelite" ? null : (await ventesSoiree(createAdminClient(), p.id)).ventes;
   return {
+    ...(ventes === null ? {} : { ventes, paliers: gains(ventes).map((g) => g.titre) }),
     id: p.id, nom: [p.first_name, p.last_name].filter(Boolean).join(" ") || "Membre", numero: fmtNumero(p.member_number),
     niveau: p.kind === "fidelite" ? "Membre" : "Ambassadeur", anniv: moisAnniv(p.birth_date, soiree),
     naissance: p.birth_date ? new Date(p.birth_date + "T12:00:00").toLocaleDateString("fr-FR", { day: "numeric", month: "long" }) : null,

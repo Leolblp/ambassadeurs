@@ -114,6 +114,16 @@ export default function Scanner() {
               Saisie manuelle : vérifie que le nom correspond à la personne (pièce d&apos;identité).
             </p>
           )}
+          {fiche.ventes !== undefined && (
+            <div style={{ padding: "12px 14px", borderRadius: 14, background: "var(--bord)", display: "flex", flexDirection: "column", gap: 6 }}>
+              <div style={{ fontSize: 15, fontWeight: 700 }}>{fiche.ventes} billet{fiche.ventes > 1 ? "s" : ""} vendu{fiche.ventes > 1 ? "s" : ""} pour cette soirée</div>
+              {fiche.paliers?.length ? (
+                <ul style={{ margin: 0, paddingLeft: 18, fontSize: 15, lineHeight: 1.5 }}>{fiche.paliers.map((t) => <li key={t}>{t}</li>)}</ul>
+              ) : (
+                <div style={{ fontSize: 14, color: "var(--gris)" }}>Aucun palier atteint (premier palier à 2 ventes).</div>
+              )}
+            </div>
+          )}
           {BOUTONS.filter((b) => b.a !== "anniv" || fiche.anniv).map((b) => {
             const fait = fiche.deja[b.a];
             return (

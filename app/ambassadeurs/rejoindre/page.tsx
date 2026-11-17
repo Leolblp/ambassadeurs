@@ -103,7 +103,7 @@ function Formulaire() {
                 </div>
                 <div className="liste-ligne">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 8a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2v-2a2 2 0 0 0 0-4z" /><path d="M14 6v12" strokeDasharray="2 3" /></svg>
-                  <span>Ton code perso<small>Chaque billet acheté avec ton code te rapporte des points.</small></span>
+                  <span>Ton code perso<small>Chaque billet acheté avec ton code compte pour tes paliers de la soirée.</small></span>
                 </div>
                 <div className="liste-ligne">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3" /><path d="M3 20a6 6 0 0 1 12 0" /><path d="M16 4a3 3 0 0 1 0 6M21 20a5 5 0 0 0-4-5" /></svg>
@@ -117,7 +117,7 @@ function Formulaire() {
               <div className="liste">
                 <div className="liste-ligne">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M20 12v9H4v-9" /><path d="M2 7h20v5H2z" /><path d="M12 21V7" /><path d="M12 7c-2-4-6-4-6-1s6 1 6 1 6 2 6-1-4-3-6 1" /></svg>
-                  <span>Des privilèges réservés au club<small>Tu les débloques avec tes points. L&apos;équipe te les remet le soir même.</small></span>
+                  <span>Des paliers à chaque soirée<small>Coupe-file dès 2 billets vendus, entrée gratuite à 3, bracelet VIP à 5, bouteille et carré VIP à 40.</small></span>
                 </div>
                 <div className="liste-ligne">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3" /><path d="M7 15h4M7 11h2" /></svg>
@@ -125,7 +125,7 @@ function Formulaire() {
                 </div>
                 <div className="liste-ligne">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.4 7L12 17.6 5.8 21.1l1.4-7L2 9.3l7-.8z" /></svg>
-                  <span>Des points qui restent<small>Ton solde n&apos;expire pas. On n&apos;y gagne pas d&apos;argent, on y gagne des privilèges.</small></span>
+                  <span>Des privilèges avec tes points<small>Les points de tes missions n&apos;expirent pas et s&apos;échangent contre des privilèges du club.</small></span>
                 </div>
               </div>
             </section>

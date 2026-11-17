@@ -2,11 +2,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { getMembre, numero, pts, dateSoiree, PREUVE } from "@/lib/membre";
 import Copier from "../_components/Copier";
+import { PaliersSoiree } from "../_components/Paliers";
+import { ventesSoiree } from "@/lib/paliers-soiree";
 
 export default async function Accueil() {
   const { supabase, user, profil, solde } = await getMembre();
 
-  const [classement, privileges, soiree, missions, preuves, reglages, equipes] = await Promise.all([
+  const [classement, privileges, soiree, missions, preuves, reglages, equipes, paliers] = await Promise.all([
     supabase.rpc("leaderboard_month"),
     supabase.from("privileges").select("name, cost").eq("is_active", true).order("cost"),
     supabase.from("events").select("id, name, starts_at, ticket_url").gte("starts_at", new Date().toISOString()).order("starts_at").limit(1).maybeSingle(),
@@ -14,6 +16,7 @@ export default async function Accueil() {
     supabase.from("proofs").select("mission_id, status").eq("member_id", user.id),
     supabase.from("app_settings").select("points_per_ticket").single(),
     profil.team_id ? supabase.rpc("leaderboard_teams_month") : Promise.resolve({ data: [] }),
+    ventesSoiree(supabase, user.id),
   ]);
   const maTeam = ((equipes.data ?? []) as { team_id: string; name: string; rank: number; members: number }[]).find((t) => t.team_id === profil.team_id);
   const nbTeams = (equipes.data ?? []).length;
@@ -69,6 +72,8 @@ export default async function Accueil() {
           <Link href="/ambassadeurs/privileges" style={{ fontSize: 13 }}>Tous les privilèges te sont ouverts →</Link>
         )}
       </section>
+
+      <PaliersSoiree ventes={paliers.ventes} soiree={paliers.soiree?.name} />
 
       {maTeam && (
         <section className="carte" style={{ borderRadius: 16, padding: "14px 16px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>

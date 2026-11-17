@@ -1,12 +1,15 @@
 import { getMembre, pts } from "@/lib/membre";
 import ListePrivileges from "./ListePrivileges";
+import { GrillePaliers } from "../../_components/Paliers";
+import { ventesSoiree } from "@/lib/paliers-soiree";
 
 export default async function Privileges() {
   const { supabase, user, solde } = await getMembre();
 
-  const [{ data: privileges }, { data: echanges }] = await Promise.all([
+  const [{ data: privileges }, { data: echanges }, paliers] = await Promise.all([
     supabase.from("privileges").select("id, name, description, cost, stock").eq("is_active", true).order("sort_order").order("cost"),
     supabase.from("redemptions").select("id, status, created_at, privileges(name)").eq("member_id", user.id).order("created_at", { ascending: false }).limit(10),
+    ventesSoiree(supabase, user.id),
   ]);
 
   return (
@@ -22,6 +25,18 @@ export default async function Privileges() {
         </div>
       </div>
 
+      <section style={{ display: "flex", flexDirection: "column", gap: 10, paddingBottom: 22 }}>
+        <div>
+          <h2 style={{ margin: 0, fontSize: 22, fontWeight: 700 }}>Paliers de la soirée</h2>
+          <p style={{ margin: "4px 0 0", fontSize: 14, lineHeight: 1.45, color: "var(--gris)" }}>Selon tes billets vendus avec ton code sur une soirée. Tout se débloque tout seul, le compteur repart à zéro à chaque soirée. Tu en es à <b style={{ color: "var(--encre)" }}>{paliers.ventes}</b>.</p>
+        </div>
+        <GrillePaliers ventes={paliers.ventes} />
+      </section>
+
+      <div style={{ paddingBottom: 6 }}>
+        <h2 style={{ margin: 0, fontSize: 22, fontWeight: 700 }}>Avec tes points</h2>
+        <p style={{ margin: "4px 0 0", fontSize: 14, lineHeight: 1.45, color: "var(--gris)" }}>Les points de tes missions s&apos;échangent ici.</p>
+      </div>
       <ListePrivileges privileges={privileges ?? []} solde={solde} />
 
       {(echanges ?? []).length > 0 && (
