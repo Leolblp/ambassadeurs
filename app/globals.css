@@ -238,3 +238,110 @@ label a::after { display: none; }
 /* Champ date sur iPhone : pas de débordement à droite, même hauteur que les autres champs */
 input[type="date"].champ { -webkit-appearance: none; appearance: none; display: block; min-width: 0; max-width: 100%; text-align: left; }
 input[type="date"].champ::-webkit-date-and-time-value { text-align: left; }
+
+/* ==========================================================================
+   V2 · même langage que le dashboard staff.lacom.club
+   Fond noir club, rouge en accent seulement, cartes opaques, listes groupées,
+   police système, verre réservé à la barre d'onglets flottante.
+   ========================================================================== */
+:root {
+  --sys: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-body), system-ui, sans-serif;
+  --fond: #000;
+  --carte: #1a1112;
+  --carte-2: #0d0506;
+  --encre: #fff;
+  --rouge: #ff453a;
+  --plein: #d70015;
+  --gris: rgba(235, 235, 245, 0.64);
+  --bord: rgba(255, 255, 255, 0.12);
+  --bord-rouge: rgba(255, 69, 58, 0.42);
+}
+html, body { font-family: var(--sys); }
+html { background: #000; }
+body { background-color: transparent; } /* laisse voir les faisceaux posés derrière */
+
+/* Fond : noir, deux faisceaux de projecteur fixes derrière le contenu. Plus de grain. */
+body { background-image: none; }
+.grain { background-image: none; }
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background-image:
+    linear-gradient(115deg, transparent 47%, rgba(255, 45, 45, 0.14) 49.6%, rgba(255, 45, 45, 0.4) 50%, rgba(255, 45, 45, 0.14) 50.4%, transparent 53%),
+    linear-gradient(62deg, transparent 47%, rgba(255, 45, 45, 0.09) 49.6%, rgba(255, 45, 45, 0.26) 50%, rgba(255, 45, 45, 0.09) 50.4%, transparent 53%);
+  background-size: 100% 520px, 100% 480px; background-position: -260px -140px, 340px -160px; background-repeat: no-repeat;
+}
+
+/* Typo : système, rien sous 12 px, titres en gras droit. */
+.label { font-size: 12px; letter-spacing: 0.08em; }
+.label-gris { font-size: 12px; letter-spacing: 0.06em; font-weight: 600; }
+.serif { font-family: var(--sys); font-style: normal; font-weight: 700; letter-spacing: -0.01em; }
+.champ-label { font-size: 13px; font-weight: 600; letter-spacing: 0; text-transform: none; }
+
+/* Cartes, boutons, champs */
+.carte { border: 0.5px solid var(--bord); }
+.btn { min-height: 52px; padding: 0 26px; border-radius: 14px; background: var(--plein); color: #fff; font: 600 16px var(--sys); letter-spacing: 0.01em; text-transform: none; }
+.btn:hover { background: #e8091f; color: #fff; }
+.champ { font-family: var(--sys); background: var(--carte-2); }
+.champ:focus { border-color: var(--rouge); box-shadow: 0 0 0 3px rgba(255, 69, 58, 0.2); }
+.champ::placeholder { color: rgba(235, 235, 245, 0.5); }
+.avantage { border: 0.5px solid var(--bord); border-radius: 16px; }
+.avantage[data-etat="dispo"] .avantage-pastille { background: rgba(255, 69, 58, 0.14); }
+.cookies { border: 0.5px solid var(--bord); }
+.admin-pastille { color: #fff; }
+.admin-bouton { font-family: var(--sys); letter-spacing: 0.02em; text-transform: none; font-size: 13px; }
+
+/* Barre d'onglets membre : flottante, en verre */
+.nav-bas {
+  left: 12px; right: 12px; bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  max-width: 456px; margin: 0 auto; padding: 4px; border-radius: 32px;
+  background: rgba(28, 22, 23, 0.62); -webkit-backdrop-filter: blur(28px) saturate(1.4); backdrop-filter: blur(28px) saturate(1.4);
+  border: 1px solid rgba(255, 255, 255, 0.14); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+.nav-onglets { display: grid; gap: 2px; }
+.nav-onglet {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 54px; border-radius: 27px;
+  text-decoration: none; color: rgba(235, 235, 245, 0.72); font-size: 11px; font-weight: 600;
+}
+.nav-onglet:hover { color: #fff; }
+.nav-onglet[aria-current="page"] { color: var(--rouge); background: rgba(255, 255, 255, 0.1); }
+.nav-onglet::after { display: none; }
+@media (prefers-reduced-transparency: reduce) {
+  .nav-bas { background: #1c1617; -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+@media (prefers-contrast: more) {
+  :root { --gris: rgba(235, 235, 245, 0.85); --bord: rgba(255, 255, 255, 0.45); --bord-rouge: rgba(255, 69, 58, 0.8); }
+  .nav-bas { border-color: rgba(255, 255, 255, 0.5); }
+}
+
+/* Listes groupées, façon Réglages */
+.liste { border-radius: 20px; background: var(--carte); overflow: hidden; }
+.liste-ligne { display: flex; align-items: center; gap: 14px; min-height: 56px; padding: 12px 16px; border-bottom: 0.5px solid var(--bord); font-size: 17px; }
+.liste-ligne:last-child { border-bottom: 0; }
+.liste-ligne > svg { flex: none; width: 24px; height: 24px; color: var(--rouge); }
+.liste-ligne > span { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.liste-ligne small { font-size: 14px; line-height: 1.4; color: var(--gris); }
+
+/* ---------- Page d'accueil ambassadeurs (/ambassadeurs/rejoindre) ---------- */
+.rej { max-width: 1040px; margin: 0 auto; padding: max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(48px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left)); }
+.rej-haut { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.rej-grille { display: grid; gap: 40px; padding-top: 36px; }
+.rej-pitch, .rej-bloc { display: flex; flex-direction: column; }
+.rej-pitch { gap: 32px; min-width: 0; }
+.rej-bloc { gap: 10px; }
+.rej-titre { margin: 0; font-family: var(--font-display), Impact, sans-serif; font-weight: 400; font-size: clamp(54px, 15vw, 92px); line-height: 0.92; letter-spacing: 0.01em; text-transform: uppercase; text-shadow: 0 0 44px rgba(255, 26, 26, 0.35); }
+.rej-titre em { font-style: normal; color: var(--rouge); }
+.rej-chapo { margin: 0; font-size: 18px; line-height: 1.5; color: var(--gris); max-width: 46ch; }
+.rej-faits { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.rej-faits li { padding: 6px 12px; border-radius: 99px; background: rgba(255, 255, 255, 0.12); font-size: 14px; font-weight: 600; }
+.rej-h2 { margin: 0; font-size: 22px; font-weight: 700; }
+.rej-etapes { list-style: none; margin: 0; padding: 0; counter-reset: etape; }
+.rej-etapes li { counter-increment: etape; }
+.rej-etapes li::before { content: counter(etape); flex: none; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: rgba(255, 69, 58, 0.16); color: var(--rouge); font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.rej-form { padding: 22px 20px 24px; border-radius: 24px; background: var(--carte); border: 0.5px solid var(--bord); scroll-margin-top: 20px; }
+.rej-cta-mobile { align-self: flex-start; }
+.rej-pied { margin: 40px 0 0; text-align: center; font-size: 13px; color: var(--gris); }
+@media (min-width: 900px) {
+  .rej-grille { grid-template-columns: minmax(0, 1.1fr) minmax(360px, 0.9fr); gap: 56px; align-items: start; padding-top: 56px; }
+  .rej-form { position: sticky; top: 24px; }
+  .rej-cta-mobile { display: none; }
+}

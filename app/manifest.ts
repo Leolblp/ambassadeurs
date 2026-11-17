@@ -8,8 +8,8 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: "/ambassadeurs",
     scope: "/",
     display: "standalone",
-    background_color: "#0c0707",
-    theme_color: "#0c0707",
+    background_color: "#000000",
+    theme_color: "#000000",
     lang: "fr",
     icons: [
       { src: "/icon.png", sizes: "512x512", type: "image/png", purpose: "any" },

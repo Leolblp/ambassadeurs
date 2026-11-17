@@ -25,21 +25,12 @@ export default function Nav({ chef = false, fidelite = false }: { chef?: boolean
       aria-label="Navigation du club"
       className="nav-bas"
     >
-      <div style={{ maxWidth: 480, margin: "0 auto", display: "grid", gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))`, padding: "8px 8px 12px" }}>
+      <div className="nav-onglets" style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}>
         {items.map((it) => {
           const actif = it.href === "/ambassadeurs" || it.href === "/ambassadeurs/carte" ? path === it.href : path.startsWith(it.href);
           return (
-            <Link
-              key={it.href}
-              href={it.href}
-              aria-current={actif ? "page" : undefined}
-              style={{
-                display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4, minHeight: 48,
-                textDecoration: "none", color: actif ? "var(--rouge)" : "var(--gris)",
-                fontSize: 11, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase",
-              }}
-            >
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <Link key={it.href} href={it.href} aria-current={actif ? "page" : undefined} className="nav-onglet">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 {it.d.map((d) => <path key={d} d={d} />)}
               </svg>
               {it.label}
