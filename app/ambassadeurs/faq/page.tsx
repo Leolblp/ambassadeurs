@@ -28,13 +28,13 @@ const BLOCS: { titre: string; questions: { q: string; r: React.ReactNode }[] }[]
   {
     titre: "Missions et points",
     questions: [
-      { q: "Comment je gagne des points ?", r: <p style={{ margin: 0 }}>En réalisant les missions (onglet Missions) et en faisant venir du monde avec ton code : chaque billet acheté avec ton code te rapporte des points.</p> },
+      { q: "Comment je gagne des points ?", r: <p style={{ margin: 0 }}>En réalisant les missions (onglet Missions). Les billets vendus avec ton code, eux, comptent pour tes paliers de la soirée.</p> },
       { q: "Comment j'envoie une preuve ?", r: <p style={{ margin: 0 }}>Dans Missions, touche « Envoyer ma preuve » et choisis ta capture d&apos;écran. Pour une story, la capture suffit. Pour un TikTok ou un réel, envoie la capture et colle le lien de la vidéo : on n&apos;envoie jamais le fichier vidéo lui-même.</p> },
       { q: "Quand mes points sont-ils crédités ?", r: <p style={{ margin: 0 }}>Dès que l&apos;équipe ou ton chef d&apos;équipe valide ta preuve, en général sous 48 h. Tu la retrouves alors dans l&apos;onglet « Validées ».</p> },
       { q: "Ma preuve a été refusée, pourquoi ?", r: <p style={{ margin: 0 }}>Le motif est écrit sur la mission. Le plus souvent : story en « amis proches », affiche coupée ou preuve trop ancienne. Corrige et renvoie une preuve, c&apos;est possible tant que la mission est ouverte.</p> },
       { q: "C'est quoi, les paliers de la soirée ?", r: <p style={{ margin: 0 }}>Tes billets vendus avec ton code sur une soirée débloquent des avantages le soir même : coupe-file à 2, entrée gratuite à 3, bracelet VIP à 5, conso offerte à 7, bouteille et carré VIP à 40, Ultra VIP à 60. La grille complète est dans l&apos;onglet Privilèges. Le compteur repart à zéro à chaque soirée.</p> },
       { q: "Mes points expirent-ils ?", r: <p style={{ margin: 0 }}>Non, ton solde reste acquis. Seul le classement du mois repart à zéro chaque début de mois.</p> },
-      { q: "À quoi sert mon code membre ?", r: <p style={{ margin: 0 }}>C&apos;est ton code personnel à donner à tes proches au moment d&apos;acheter leur billet. Chaque billet acheté avec ton code te rapporte des points. Tu le retrouves sur ton accueil et sur ta carte.</p> },
+      { q: "À quoi sert mon code membre ?", r: <p style={{ margin: 0 }}>C&apos;est ton code personnel à donner à tes proches au moment d&apos;acheter leur billet. Chaque billet acheté avec ton code compte pour tes paliers de la soirée. Tu le retrouves sur ton accueil et sur ta carte.</p> },
     ],
   },
   {
