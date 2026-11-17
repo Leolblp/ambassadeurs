@@ -87,7 +87,7 @@ async function objet(memberId: string) {
   const textes = [
     ...(d.code ? [{ id: "code", header: "Code membre", body: d.code }] : []),
     ...(d.team ? [{ id: "team", header: "Team", body: d.team }] : []),
-    { id: "avantages", header: "Chaque soirée", body: "Coupe-file · 1 shot offert" },
+    { id: "avantages", header: "Chaque soirée", body: "Coupe-file · offres surprises" },
     { id: "anniv", header: "Surprise d'anniversaire", body: d.anniv },
     ...(d.ambassadeur ? [{ id: "prochain", header: d.prochain ? "Prochain privilège" : "Privilèges", body: d.prochain ? `${d.prochain.name} · encore ${d.prochain.reste} pts` : "Tous accessibles" }] : []),
     ...(d.soiree ? [{ id: "soiree", header: " ", body: d.soiree }] : []),

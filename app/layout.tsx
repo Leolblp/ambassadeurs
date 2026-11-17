@@ -11,7 +11,7 @@ const body = Manrope({ subsets: ["latin"], variable: "--font-body" });
 
 export const metadata: Metadata = {
   title: "XOXO Club · La Commerciale",
-  description: "La carte gratuite de La Commerciale : coupe-file, un shot offert à chaque soirée et une surprise pour ton anniversaire.",
+  description: "La carte gratuite de La Commerciale : coupe-file à chaque soirée et des offres surprises réservées aux détenteurs de la carte.",
   robots: { index: false, follow: false },
   applicationName: "XOXO Club",
   appleWebApp: { capable: true, title: "XOXO Club", statusBarStyle: "black" },

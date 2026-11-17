@@ -141,14 +141,14 @@ export async function genererPass(memberId: string): Promise<Buffer> {
           ? [prochain
               ? { key: "prochain", label: "PROCHAIN PRIVILÈGE", value: `${prochain.name} · encore ${prochain.reste} pts` }
               : { key: "prochain", label: "PRIVILÈGES", value: "Tous accessibles" }]
-          : [{ key: "avantages", label: "CHAQUE SOIRÉE", value: "Coupe-file · 1 shot" }]),
+          : [{ key: "avantages", label: "CHAQUE SOIRÉE", value: "Coupe-file" }]),
       ],
       backFields: [
         // Champ toujours présent : iPhone n'affiche une notification que si la valeur d'un champ EXISTANT change
         // (un champ qui apparaît pour la première fois ne déclenche rien).
         { key: "annonce", label: "Message du club", value: d.annonce?.texte ?? "Bienvenue au club. Les messages de La Commerciale apparaîtront ici.", changeMessage: "%@" },
         { key: "espace", label: "Ton espace membre", value: `${SITE}/ambassadeurs`, attributedValue: `<a href="${SITE}/ambassadeurs">Ouvrir mon espace</a>` },
-        { key: "avantages-detail", label: "Tes avantages", value: "Coupe-file et 1 shot offert à chaque soirée. Une surprise pendant ton mois d'anniversaire." },
+        { key: "avantages-detail", label: "Tes avantages", value: "Coupe-file à chaque soirée. Des offres surprises réservées aux détenteurs de la carte." },
         { key: "anniv", label: "Ton anniversaire", value: d.anniv },
         { key: "usage", label: "Comment l'utiliser", value: "Présente le QR de cette carte à l'entrée et au bar de La Commerciale." },
         { key: "depuis", label: "Membre depuis", value: new Date(p.created_at).toLocaleDateString("fr-FR", { month: "long", year: "numeric" }) },

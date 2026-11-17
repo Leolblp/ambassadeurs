@@ -4,10 +4,9 @@ import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import jsQR from "jsqr";
 import { chercher, valider, type Fiche } from "./actions";
 
-type Avantage = "coupe_file" | "shot" | "anniv";
+type Avantage = "coupe_file" | "anniv";
 const BOUTONS: { a: Avantage; label: string; fait: string }[] = [
   { a: "coupe_file", label: "Coupe-file", fait: "Coupe-file utilisé" },
-  { a: "shot", label: "Servir le shot", fait: "Shot déjà servi" },
   { a: "anniv", label: "Surprise anniv", fait: "Surprise déjà remise" },
 ];
 const heure = (iso: string) => new Date(iso).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });

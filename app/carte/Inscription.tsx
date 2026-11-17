@@ -45,8 +45,7 @@ export default function Inscription() {
           <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 8 }}>
             {[
               ["Coupe-file", "à chaque soirée"],
-              ["1 shot offert", "à chaque soirée"],
-              ["Une surprise", "pendant ton mois d'anniversaire"],
+              ["Des offres surprises", "réservées aux détenteurs de la carte"],
             ].map(([t, d]) => (
               <li key={t} style={{ display: "flex", alignItems: "baseline", gap: 10, fontSize: 15 }}>
                 <span aria-hidden="true" style={{ color: "var(--rouge)" }}>✕</span>
