@@ -1,7 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { getMembre, numero, pts, dateSoiree, PREUVE } from "@/lib/membre";
-import Copier from "../_components/Copier";
+import Partage from "../_components/Partage";
+import KitVisuels from "../_components/KitVisuels";
+import { kitDrive } from "@/lib/drive";
+import { dossierDrive, lienPerso, texteStory } from "@/lib/partage";
 import { PaliersSoiree } from "../_components/Paliers";
 import { ventesSoiree } from "@/lib/paliers-soiree";
 
@@ -17,8 +20,11 @@ export default async function Accueil() {
     profil.team_id ? supabase.rpc("leaderboard_teams_month") : Promise.resolve({ data: [] }),
     ventesSoiree(supabase, user.id),
   ]);
-  // Lien du dossier de visuels : première adresse trouvée dans la description de la soirée
-  const visuels = /https?:\/\/[^\s)]+/.exec(soiree.data?.description ?? "")?.[0] ?? null;
+  // Partage rapide : lien perso (code appliqué tout seul), texte prêt à coller, visuels du Drive de la soirée
+  const dossier = dossierDrive(soiree.data?.description);
+  const kit = dossier ? await kitDrive(dossier.id).catch(() => []) : [];
+  const lien = lienPerso(soiree.data?.ticket_url, profil.promo_code);
+  const texte = soiree.data ? texteStory(soiree.data, profil.promo_code, lien) : profil.promo_code ? `My code for La Commerciale: ${profil.promo_code}` : "";
   const maTeam = ((equipes.data ?? []) as { team_id: string; name: string; rank: number; members: number }[]).find((t) => t.team_id === profil.team_id);
   const nbTeams = (equipes.data ?? []).length;
 
@@ -103,26 +109,13 @@ export default async function Accueil() {
         </section>
       )}
 
-      {visuels && (
-        <a href={visuels} target="_blank" rel="noopener noreferrer" className="carte" style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", borderRadius: 16, textDecoration: "none" }}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--rouge)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flex: "none" }}><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /></svg>
-          <span style={{ flexGrow: 1, minWidth: 0 }}>
-            <span style={{ display: "block", fontSize: 15, fontWeight: 700 }}>Visuels et vidéos à utiliser</span>
-            <span style={{ display: "block", fontSize: 13, color: "var(--gris)", marginTop: 2 }}>Le dossier Google Drive de la soirée</span>
-          </span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gris)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" /></svg>
-        </a>
-      )}
+      {(profil.promo_code || lien) && <Partage code={profil.promo_code} texte={texte} lien={lien} />}
 
-      {profil.promo_code && (
-        <section style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, padding: "14px 16px", border: "1px dashed var(--bord-rouge)", borderRadius: 16 }}>
-          <div>
-            <div className="label-gris">Ton code</div>
-            <div className="display" style={{ fontSize: 22, letterSpacing: ".08em", marginTop: 2 }}>{profil.promo_code}</div>
-          </div>
-          <Copier code={profil.promo_code} partage />
-        </section>
-      )}
+      {dossier && (kit.length > 0 ? (
+        <KitVisuels medias={kit} dossier={dossier.url} texte={texte} />
+      ) : (
+        <a href={dossier.url} target="_blank" rel="noopener noreferrer" className="btn-second" style={{ minHeight: 52 }}>Visuels et vidéos de la soirée ↗</a>
+      ))}
 
       <section style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
