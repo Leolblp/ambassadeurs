@@ -111,11 +111,8 @@ export default async function Accueil() {
 
       {(profil.promo_code || lien) && <Partage code={profil.promo_code} texte={texte} lien={lien} />}
 
-      {dossier && (kit.length > 0 ? (
-        <KitVisuels medias={kit} dossier={dossier.url} texte={texte} />
-      ) : (
-        <a href={dossier.url} target="_blank" rel="noopener noreferrer" className="btn-second" style={{ minHeight: 52 }}>Visuels et vidéos de la soirée ↗</a>
-      ))}
+      {/* Pas de lien vers le dossier Drive entier : il contient aussi les visuels BDE, qui ne sont pas pour les ambassadeurs */}
+      {kit.length > 0 && <KitVisuels medias={kit} texte={texte} />}
 
       <section style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>

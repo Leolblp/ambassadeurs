@@ -9,7 +9,7 @@ const miniature = (id: string, l = 360) => `https://lh3.googleusercontent.com/d/
 const original = (m: Media) => (m.type === "image" ? `https://lh3.googleusercontent.com/d/${m.id}=s0` : `/api/media/${m.id}`);
 
 /** Kit de la soirée : les visuels et vidéos du Drive, visibles directement et partageables en story en un geste. */
-export default function KitVisuels({ medias, dossier, texte }: { medias: Media[]; dossier: string; texte: string }) {
+export default function KitVisuels({ medias, texte }: { medias: Media[]; texte: string }) {
   const { toast, el } = useToast();
   const groupes = useMemo(() => [...new Set(medias.map((m) => m.dossier))], [medias]);
   const [filtre, setFiltre] = useState("");
@@ -42,7 +42,7 @@ export default function KitVisuels({ medias, dossier, texte }: { medias: Media[]
         toast("Téléchargé · texte de story copié");
       }
     } catch (e) {
-      if (!(e instanceof DOMException && e.name === "AbortError")) toast("Impossible de récupérer ce fichier, ouvre le dossier");
+      if (!(e instanceof DOMException && e.name === "AbortError")) toast("Impossible de récupérer ce fichier, réessaie");
     } finally {
       setEnvoi(false);
     }
@@ -55,7 +55,6 @@ export default function KitVisuels({ medias, dossier, texte }: { medias: Media[]
           <h2 id="kit-titre" style={{ margin: 0, fontSize: 22, fontWeight: 700 }}>Kit de la soirée</h2>
           <p style={{ margin: "2px 0 0", fontSize: 14, color: "var(--gris)" }}>{medias.length} visuel{medias.length > 1 ? "s" : ""} à reposter</p>
         </div>
-        <a href={dossier} target="_blank" rel="noopener noreferrer" style={{ fontSize: 14, fontWeight: 600, whiteSpace: "nowrap" }}>Dossier ↗</a>
       </div>
 
       {groupes.length > 1 && (

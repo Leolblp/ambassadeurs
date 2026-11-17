@@ -19,7 +19,7 @@ async function lire(id: string) {
   return out;
 }
 
-/** Tous les visuels et vidéos du dossier de la soirée, sous-dossiers compris (2 niveaux). */
+/** Tous les visuels et vidéos du dossier de la soirée, sous-dossiers compris (2 niveaux). Les dossiers et fichiers BDE et Billetterie sont exclus : ils ne sont pas pour les ambassadeurs. */
 export async function kitDrive(dossierId: string): Promise<Media[]> {
   const res: Media[] = [];
   const parcourir = async (id: string, chemin: string, niveau: number) => {
@@ -27,7 +27,7 @@ export async function kitDrive(dossierId: string): Promise<Media[]> {
     await Promise.all(items.map(async (it) => {
       if (it.dossier) {
         if (niveau < 2 && !/phrase|texte|source|psd|archive|bde|billetterie/i.test(it.nom)) await parcourir(it.id, chemin ? `${chemin} · ${it.nom}` : it.nom, niveau + 1);
-      } else if (IMG.test(it.nom) || VID.test(it.nom)) {
+      } else if ((IMG.test(it.nom) || VID.test(it.nom)) && !/\bbde\b/i.test(it.nom)) {
         res.push({ id: it.id, nom: it.nom, type: VID.test(it.nom) ? "video" : "image", dossier: chemin || "Visuels" });
       }
     }));
