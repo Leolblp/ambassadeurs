@@ -27,6 +27,7 @@ export default async function Soirees() {
           <div><label className="champ-label" htmlFor="name">Nom</label><input className="champ" id="name" name="name" required /></div>
           <div><label className="champ-label" htmlFor="starts_at">Date et heure (heure de Lyon)</label><input className="champ" id="starts_at" name="starts_at" type="datetime-local" required /></div>
           <div><label className="champ-label" htmlFor="ticket_url">Lien billetterie</label><input className="champ" id="ticket_url" name="ticket_url" type="url" placeholder="https://yurplan.com/…" /></div>
+          <div><label className="champ-label" htmlFor="yurplan_id">ID Yurplan (ou adresse pro.yurplan.com de la soirée)</label><input className="champ" id="yurplan_id" name="yurplan_id" placeholder="213416" /></div>
           <div><label className="champ-label" htmlFor="description">Description</label><textarea className="champ" id="description" name="description" rows={2} /></div>
         </FormAction>
       </section>
@@ -48,6 +49,7 @@ export default async function Soirees() {
                   <div><label className="champ-label" htmlFor={`n-${s.id}`}>Nom</label><input className="champ" id={`n-${s.id}`} name="name" required defaultValue={s.name} /></div>
                   <div><label className="champ-label" htmlFor={`d-${s.id}`}>Date et heure (heure de Lyon)</label><input className="champ" id={`d-${s.id}`} name="starts_at" type="datetime-local" required defaultValue={saisieLyon(s.starts_at)} /></div>
                   <div><label className="champ-label" htmlFor={`t-${s.id}`}>Lien billetterie</label><input className="champ" id={`t-${s.id}`} name="ticket_url" type="url" defaultValue={s.ticket_url ?? ""} placeholder="https://yurplan.com/…" /></div>
+                  <div><label className="champ-label" htmlFor={`y-${s.id}`}>ID Yurplan (ou adresse pro.yurplan.com de la soirée)</label><input className="champ" id={`y-${s.id}`} name="yurplan_id" defaultValue={s.yurplan_id ?? ""} placeholder="213416" /></div>
                   <div><label className="champ-label" htmlFor={`x-${s.id}`}>Description</label><textarea className="champ" id={`x-${s.id}`} name="description" rows={2} defaultValue={s.description ?? ""} /></div>
                 </FormAction>
                 <p style={{ margin: 0, fontSize: 12, color: "var(--gris)" }}>Si tu changes l&apos;heure, les échéances des missions liées sont décalées d&apos;autant et les cartes Wallet sont mises à jour.</p>

@@ -87,7 +87,7 @@ export async function accepterDemande(id: string): Promise<Resultat> {
     after(async () => { await pousserCarte(carte.id).catch(() => {}); await majGoogle(carte.id).catch(() => {}); });
     await supabase.from("access_requests").update({ status: "accepted", reviewed_by: user.id, reviewed_at: new Date().toISOString() }).eq("id", id);
     revalidatePath("/ambassadeurs/admin/demandes");
-    return { ok: true, message: `${d.first_name} avait déjà la carte : passé ambassadeur, code ${code0}. Il le voit à sa prochaine connexion.` };
+    return { ok: true, message: `${d.first_name} avait déjà la carte : passé ambassadeur, code ${code0}. Il le voit à sa prochaine connexion. Crée le code dans Yurplan (bloc en haut de l'admin).` };
   }
 
   // 1. Création du compte (le profil est créé automatiquement). Aucun email : tout passe par WhatsApp.
@@ -121,7 +121,7 @@ export async function accepterDemande(id: string): Promise<Resultat> {
 
   revalidatePath("/ambassadeurs/admin/demandes");
   revalidatePath("/ambassadeurs/equipe");
-  return { ok: true, message: `Bienvenue à ${d.first_name} : code ${code}, ${canal}.` };
+  return { ok: true, message: `Bienvenue à ${d.first_name} : code ${code}, ${canal}. Crée le code dans Yurplan (bloc en haut de cette page).` };
 }
 
 export async function refuserDemande(id: string): Promise<Resultat> {
@@ -144,6 +144,7 @@ export async function creerSoiree(_: Resultat, f: FormData): Promise<Resultat> {
     starts_at: heureLyon(date),
     description: txt(f, "description") || null,
     ticket_url: txt(f, "ticket_url") || null,
+    yurplan_id: idYurplan(txt(f, "yurplan_id")),
   });
   revalidatePath("/ambassadeurs/admin/soirees");
   return error ? { ok: false, message: error.message } : { ok: true, message: "Soirée ajoutée." };
@@ -161,6 +162,7 @@ export async function modifierSoiree(id: string, _: Resultat, f: FormData): Prom
     starts_at: debut,
     description: txt(f, "description") || null,
     ticket_url: txt(f, "ticket_url") || null,
+    yurplan_id: idYurplan(txt(f, "yurplan_id")),
   }).eq("id", id);
   if (error) return { ok: false, message: error.message };
 
@@ -185,6 +187,24 @@ export async function modifierSoiree(id: string, _: Resultat, f: FormData): Prom
   revalidatePath("/ambassadeurs/admin/soirees");
   revalidatePath("/ambassadeurs");
   return { ok: true, message: decalees ? `Soirée modifiée, ${decalees} échéance${decalees > 1 ? "s" : ""} de mission décalée${decalees > 1 ? "s" : ""}.` : "Soirée modifiée." };
+}
+
+/** "213415" ou une adresse pro.yurplan.com/event/213415/... -> 213415 */
+function idYurplan(saisie: string) {
+  const m = saisie.match(/(?:event\/)?(\d{5,})/);
+  return m ? Number(m[1]) : null;
+}
+
+/** Code ambassadeur créé à la main dans Yurplan pour cette soirée. */
+export async function marquerCodeYurplan(soiree: string, code: string): Promise<Resultat> {
+  const { supabase } = await requireAdmin();
+  const { data: e } = await supabase.from("events").select("yurplan_codes").eq("id", soiree).single();
+  if (!e) return { ok: false, message: "Soirée introuvable." };
+  const codes = Array.from(new Set([...(e.yurplan_codes ?? []), code]));
+  const { error } = await supabase.from("events").update({ yurplan_codes: codes }).eq("id", soiree);
+  revalidatePath("/ambassadeurs/admin");
+  revalidatePath("/ambassadeurs/admin/demandes");
+  return error ? { ok: false, message: error.message } : { ok: true, message: "Noté." };
 }
 
 export async function supprimerSoiree(id: string): Promise<Resultat> {

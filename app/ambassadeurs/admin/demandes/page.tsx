@@ -1,4 +1,5 @@
 import { requireAdmin } from "@/lib/admin";
+import { CodesYurplan } from "../CodesYurplan";
 import { dateCourte } from "@/lib/format";
 import { accepterDemande, refuserDemande } from "../actions";
 import { BoutonAction } from "../ui";
@@ -16,6 +17,8 @@ export default async function Demandes() {
         <p className="label" style={{ margin: 0 }}>Demandes d&apos;accès</p>
         <h1 className="serif" style={{ margin: "6px 0 0", fontSize: 40, lineHeight: 1 }}>Qui entre dans le club ?</h1>
       </header>
+
+      <CodesYurplan supabase={supabase} />
 
       {(attente ?? []).length === 0 ? (
         <p className="carte" style={{ padding: 32, textAlign: "center", color: "var(--gris)" }}>Aucune demande en attente.</p>

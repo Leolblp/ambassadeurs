@@ -2,6 +2,7 @@ import { requireAdmin } from "@/lib/admin";
 import { numero, dateCourte } from "@/lib/format";
 import { validerPreuve, refuserPreuve } from "./actions";
 import { BoutonAction, RefusAvecMotif } from "./ui";
+import { CodesYurplan } from "./CodesYurplan";
 
 type Ligne = {
   id: string; file_path: string | null; link: string | null; created_at: string;
@@ -31,6 +32,8 @@ export default async function Preuves() {
         <p className="label" style={{ margin: 0 }}>File des preuves</p>
         <h1 className="serif" style={{ margin: "6px 0 0", fontSize: 40, lineHeight: 1 }}>À valider</h1>
       </header>
+
+      <CodesYurplan supabase={supabase} />
 
       {preuves.length === 0 ? (
         <p className="carte" style={{ padding: 32, textAlign: "center", color: "var(--gris)" }}>Tout est validé. Rien en attente.</p>
