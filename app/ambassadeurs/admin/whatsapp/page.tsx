@@ -1,7 +1,7 @@
 import { requireAdmin } from "@/lib/admin";
 import { dateCourte } from "@/lib/format";
 import { diagnostic, MODELES_META, statutsModeles } from "@/lib/whatsapp";
-import { brancherWebhook, envoyerTest, soumettreModeles } from "../actions";
+import { brancherWebhook, envoyerTest, relancerInvitationsSms, soumettreModeles } from "../actions";
 import { BoutonAction } from "../ui";
 
 export const dynamic = "force-dynamic";
@@ -45,6 +45,7 @@ export default async function WhatsApp() {
             <BoutonAction action={soumettreModeles} label="Soumettre à Meta" variante="plein" />
             <BoutonAction action={envoyerTest} label="M'envoyer un test" />
             <BoutonAction action={brancherWebhook} label="Diagnostic et suivi" />
+            <BoutonAction action={relancerInvitationsSms} label="Relancer par SMS les invitations non reçues" confirmer="Envoyer par SMS l'accès et le code aux ambassadeurs jamais connectés dont l'invitation WhatsApp n'est pas arrivée ?" />
           </div>
         </div>
         {!statuts.ok && <p className="carte" style={{ margin: 0, padding: 14, color: "var(--rouge)", fontSize: 14 }}>{statuts.erreur}</p>}

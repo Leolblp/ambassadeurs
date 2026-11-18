@@ -435,6 +435,27 @@ export async function envoyerTest(): Promise<Resultat> {
   return ok ? { ok: true, message: "Message de test envoyé sur ton WhatsApp." } : { ok: false, message: "Échec de l'envoi, voir le journal ci-dessous." };
 }
 
+/** Ambassadeurs jamais connectés dont l'invitation WhatsApp n'est pas arrivée : accès et code renvoyés par SMS. */
+export async function relancerInvitationsSms(): Promise<Resultat> {
+  await requireAdmin();
+  const admin = createAdminClient();
+  const { data: membres } = await admin.from("profiles").select("id, first_name, phone, promo_code").eq("kind", "ambassadeur").eq("status", "active").not("promo_code", "is", null);
+  const { envoyerSms } = await import("@/lib/sms");
+  let envoyes = 0;
+  const noms: string[] = [];
+  for (const m of membres ?? []) {
+    const { data: u } = await admin.auth.admin.getUserById(m.id);
+    if (u?.user?.last_sign_in_at) continue;
+    const { data: logs } = await admin.from("whatsapp_log").select("template, statut").eq("member_id", m.id).order("created_at", { ascending: false }).limit(5);
+    if ((logs ?? []).some((l) => l.template === "sms_code" && l.statut === "sent")) continue; // déjà relancé
+    if ((logs ?? []).some((l) => l.template === "xoxo_acces_accepte" && (l.statut === "read" || l.statut === "delivered"))) continue;
+    const texte = `XOXO Club : ${m.first_name || "Salut"}, ton acces ambassadeur est valide ! Ton code : ${m.promo_code} (-1 EUR sur ta place). Connecte-toi avec ton numero : lacom.club/ambassadeurs/connexion`;
+    if (await envoyerSms(m.id, m.phone, texte)) { envoyes++; noms.push(m.first_name ?? "?"); }
+  }
+  revalidatePath("/ambassadeurs/admin/whatsapp");
+  return { ok: true, message: envoyes ? `${envoyes} SMS envoyé(s) : ${noms.join(", ")}.` : "Personne à relancer." };
+}
+
 /* ---------- Notifications Wallet ---------- */
 
 export async function envoyerAnnonce(_: Resultat, f: FormData): Promise<Resultat> {
