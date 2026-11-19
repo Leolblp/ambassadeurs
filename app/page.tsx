@@ -62,6 +62,9 @@ export default function Entree() {
         <span style={{ flexBasis: "100%", textAlign: "center", letterSpacing: ".08em", textTransform: "none" }}>
           <Link href="/ambassadeurs/mentions-legales" style={{ color: "var(--gris)" }}>Mentions légales</Link> · <Link href="/ambassadeurs/confidentialite" style={{ color: "var(--gris)" }}>Confidentialité</Link> · <LienCookies />
         </span>
+        <span style={{ flexBasis: "100%", textAlign: "center", letterSpacing: ".08em", textTransform: "none" }}>
+          <a href="https://mbcevents.fr/" style={{ color: "var(--gris)" }}>Privatiser un lieu du Groupe MBC à Lyon</a>
+        </span>
       </footer>
     </div>
   );
