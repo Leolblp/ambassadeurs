@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import Script from "next/script";
 import { LienCookies } from "./_components/Consentement";
 import CarteFid from "./_components/CarteFid";
 
@@ -52,6 +53,18 @@ export default function Entree() {
           <Link href="/ambassadeurs/rejoindre" style={{ fontSize: 14, fontWeight: 700 }}>Demander mon accès ambassadeur</Link>
         </div>
       </main>
+
+      <section id="billetterie" style={{ position: "relative", padding: "48px clamp(12px, 4vw, 56px) 40px", borderTop: "1px solid var(--bord)", display: "flex", flexDirection: "column", alignItems: "center", gap: 18 }}>
+        <p className="label" style={{ margin: 0, letterSpacing: ".28em" }}>Prochaines soirées</p>
+        <iframe
+          title="Billetterie La Commerciale"
+          src="https://shotgun.live/venues/la-commerciale?embedded=1&ui=dark&transparentBackground=1"
+          allow="payment"
+          loading="lazy"
+          style={{ width: "min(960px, 100%)", height: 800, maxHeight: "calc(100vh - 120px)", border: 0, colorScheme: "none" }}
+        />
+        <Script src="https://shotgun.live/widget.js" strategy="lazyOnload" />
+      </section>
 
       <footer className="label-gris" style={{ position: "relative", display: "flex", justifyContent: "center", flexWrap: "wrap", gap: "14px 40px", padding: "24px 20px 32px", borderTop: "1px solid var(--bord)", fontSize: 11, letterSpacing: ".22em" }}>
         <span>Carte gratuite</span>
